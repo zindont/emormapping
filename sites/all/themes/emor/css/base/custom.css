@@ -42,15 +42,20 @@
 }
 /*END HEADER WELCOME*/
 
-/*INDEX TREE*/
+/*INDEX TREE & BUBBLE CHART*/
 .path-frontpage #content{
 	color: #FFF;
 }
-.path-frontpage #content .index{
+.path-frontpage #content .index,
+.path-frontpage #content .bubble-chart{
 	background-color: #76A1C3;
 	padding: 0 10px 10px;
 }
-.path-frontpage #content .index h2{
+.path-frontpage #content .index{
+	border-right: 1px solid #1b5292;
+}
+.path-frontpage #content .index h2,
+.path-frontpage #content .bubble-chart h2{
 	font-weight: bold;
 	font-size: 30px;
 	margin: 15px;
@@ -58,7 +63,7 @@
 .path-frontpage #content .index .cate-color{
 	font-size: 30px;
 	vertical-align: middle;
-	margin-right: 5px;
+	margin-right: 10px;
 }
 .path-frontpage #content .index .nav{
 	color: #FFF;
@@ -93,4 +98,9 @@
 .path-frontpage #content .index .nav>li .dropdown-menu a:focus{
 	color: #1b5292;
 }
-/*END INDEX TREE*/
+.path-frontpage #content .bubble-chart img{
+    background-color: #D1E1F2;
+    padding: 15px;
+    width: 100%;
+}
+/*END INDEX TREE & BUBBLE CHART*/

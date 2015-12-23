@@ -1,3 +1,19 @@
+jQuery(document).ready(function ($) {
+	//Gradient IndexTree
+	var tmp = generateColor('#668BB7','#0B3567',$('.index .nav>li').length);
+	$('.index .nav>li').each(function(index){
+		$(this).css("background-color", '#'+tmp[index]);
+	});
+	//Same height content in Mapping Home
+	var treeHeight = $('#content .index').height();
+	console.log(treeHeight);
+	console.log(treeHeight - $('#content .bubble-chart h2').outerHeight(true));
+	$('#content .bubble-chart img').outerHeight(treeHeight - $('#content .bubble-chart h2').outerHeight(true));
+	//END
+});
+
+
+
 function hex (c) {
   var s = "0123456789abcdef";
   var i = parseInt (c);
@@ -55,15 +71,3 @@ function generateColor(colorStart,colorEnd,colorCount){
 	return saida;
 	
 }
-
-// Exemplo de como usar
-
-
-jQuery(document).ready(function ($) {
-	//Gradient IndexTree
-	var tmp = generateColor('#668BB7','#0B3567',$('.index .nav>li').length);
-	$('.index .nav>li').each(function(index){
-		console.log(tmp[index]);
-		$(this).css("background-color", '#'+tmp[index]);
-	});
-});
