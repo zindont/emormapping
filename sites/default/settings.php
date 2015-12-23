@@ -714,8 +714,8 @@ if (file_exists(__DIR__ . '/settings.local.php')) {
 }
 $databases['default']['default'] = array (
   'database' => 'emormapping',
-  'username' => 'root',
-  'password' => 'hacker',
+  'username' => 'andeptrai',
+  'password' => 'abc123',
   'prefix' => '',
   'host' => '192.168.1.222',
   'port' => '3306',
@@ -734,8 +734,8 @@ $whitelist = array(
 if ( !in_array($exIP, $whitelist) ){
 	$databases['default']['default'] = array (
 	  'database' => 'emormapping',
-	  'username' => 'root',
-	  'password' => 'hacker',
+	  'username' => 'andeptrai',
+	  'password' => 'abc123',
 	  'prefix' => '',
 	  'host' => '116.98.110.213',
 	  'port' => '223',
