@@ -1,0 +1,96 @@
+/*TOP NAVBAR*/
+.navbar-static-top{
+  background-color: #0B3564;
+  border: 0;
+  min-height: unset;
+  height: auto;
+}
+.navbar-static-top .navbar-nav>li>a{
+	padding: 13px 10px;
+	text-transform: uppercase;
+	font-weight: bold;
+	color: #FFF;
+}
+.navbar-brand{
+	padding: 8.5px 20px 8.5px 0;
+	height: auto;
+}
+.navbar-static-top .navbar-nav>.active>a, 
+.navbar-static-top .navbar-nav>.active>a:focus, 
+.navbar-static-top .navbar-nav>.active>a:hover,
+.navbar-static-top .navbar-nav>li>a:focus,
+.navbar-static-top .navbar-nav>li>a:hover{
+    color: #FFF;
+    background-color: #658cb6;	
+}
+
+.navbar-brand>img{
+  height: 100%;
+}
+/*END TOP NAVBAR*/
+
+/*HEADER WELCOME*/
+#block-headerwelcometext h1{
+	font-size: 43px;
+}
+#block-headerwelcometext p{
+	font-size: 19px;
+}
+#block-headerwelcometext img{
+	width: 100%;
+	height: auto;
+}
+/*END HEADER WELCOME*/
+
+/*INDEX TREE*/
+.path-frontpage #content{
+	color: #FFF;
+}
+.path-frontpage #content .index{
+	background-color: #76A1C3;
+	padding: 0 10px 10px;
+}
+.path-frontpage #content .index h2{
+	font-weight: bold;
+	font-size: 30px;
+	margin: 15px;
+}
+.path-frontpage #content .index .cate-color{
+	font-size: 30px;
+	vertical-align: middle;
+	margin-right: 5px;
+}
+.path-frontpage #content .index .nav{
+	color: #FFF;
+}
+.path-frontpage #content .index .nav>li>a{
+	color: #FFF;
+	padding: 10px;
+	border-radius: 0;
+	font-weight: bold;
+}
+.path-frontpage #content .index .nav>li>a:hover,
+.path-frontpage #content .index .nav>li>a:focus,
+.path-frontpage #content .index .nav>li.dropdown.open>a{
+	color: #1b5292;
+}
+.path-frontpage #content .index .nav>li>a .fa-angle-right{
+	font-size: 30px;
+	vertical-align: middle;
+	float: right;
+}
+.path-frontpage #content .index .nav>li .dropdown-menu{
+	right: 0;
+	left: 100%;
+	border-radius: 0;
+	background-color: #0B3567;
+	border: 1px solid #ccc;
+}
+.path-frontpage #content .index .nav>li .dropdown-menu a{
+	color: #FFF;
+}
+.path-frontpage #content .index .nav>li .dropdown-menu a:hover,
+.path-frontpage #content .index .nav>li .dropdown-menu a:focus{
+	color: #1b5292;
+}
+/*END INDEX TREE*/
