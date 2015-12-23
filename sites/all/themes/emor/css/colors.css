@@ -2,13 +2,13 @@
 
 body {
   color: #1b5292;
-  background: #292929;
+  background: #e7ebee;
 }
 #page,
 #main-wrapper,
 .region-primary-menu .menu-item a.is-active,
 .region-primary-menu .menu-item--active-trail a {
-  background: #ffffff;
+  background: #e7ebee;
 }
 .tabs ul.primary li a.is-active {
   background-color: #ffffff;
