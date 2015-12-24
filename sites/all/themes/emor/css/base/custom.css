@@ -47,15 +47,20 @@
 	color: #FFF;
 }
 .path-frontpage #content .index,
-.path-frontpage #content .bubble-chart{
+.path-frontpage #content .bubble-chart,
+.path-frontpage #content .index-search,
+.path-frontpage #content .knowledge-base{
 	background-color: #76A1C3;
 	padding: 0 10px 10px;
 }
-.path-frontpage #content .index{
+.path-frontpage #content .index,
+.path-frontpage #content .index-search{
 	border-right: 1px solid #1b5292;
 }
 .path-frontpage #content .index h2,
-.path-frontpage #content .bubble-chart h2{
+.path-frontpage #content .bubble-chart h2,
+.path-frontpage #content .index-search h2,
+.path-frontpage #content .knowledge-base h2{
 	font-weight: bold;
 	font-size: 30px;
 	margin: 15px;
@@ -70,7 +75,7 @@
 }
 .path-frontpage #content .index .nav>li>a{
 	color: #FFF;
-	padding: 10px;
+	padding: 15px 10px;
 	border-radius: 0;
 	font-weight: bold;
 }
@@ -99,7 +104,7 @@
 	color: #1b5292;
 }
 .path-frontpage #content .bubble-chart img{
-    background-color: #D1E1F2;
+    background-color: #BCD3E8;
     padding: 15px;
     width: 100%;
 }
@@ -131,3 +136,69 @@
 	margin: 0;
 }
 /*END MAPPING GUIDE*/
+/*INDEX SEARCH FORM*/
+.path-frontpage #content .index-search form{
+	background-color: #BCD3E8;
+	padding: 5px;
+	position: relative;
+}
+.path-frontpage #content .index-search input{
+	height: 43px;
+	border: 0;
+	outline: none;
+	color: #1b5292;
+	font-weight: bold;
+}
+.path-frontpage #content .index-search button{
+	height: 43px;
+	border: 0;
+	background-color: transparent;
+	margin: 0;
+	padding: 0;
+	font-size: 20px;
+	font-weight: bold;
+}
+/*END INDEX SEARCH FORM*/
+/*KNOWLEDGE BASE SEARCH FORM*/
+.path-frontpage #content .knowledge-base .search{
+	padding-left: 5px;
+}
+.path-frontpage #content .knowledge-base .search form{
+	background-color: #BCD3E8;
+	padding: 5px;
+	position: relative;
+}
+.path-frontpage #content .knowledge-base .search input{
+	height: 43px;
+	border: 0;
+	outline: none;
+	color: #1b5292;
+	font-weight: bold;
+}
+.path-frontpage #content .knowledge-base .search button{
+	height: 43px;
+	border: 0;
+	background-color: transparent;
+	margin: 0;
+	padding: 0;
+	font-size: 20px;
+	font-weight: bold;
+}
+.path-frontpage #content .knowledge-base .list-menu{
+	padding-right: 5px;
+}
+.path-frontpage #content .knowledge-base .list-menu ul{
+	background-color: #BCD3E8;
+}
+.path-frontpage #content .knowledge-base .list-menu ul .fa{
+	vertical-align: middle;
+	margin-right: 10px;
+	font-size: 30px;
+}
+.path-frontpage #content .knowledge-base .list-menu ul .fa-stop{
+	color: #FFF;
+}
+.path-frontpage #content .knowledge-base .list-menu .nav-pills>li>a{
+	padding: 13.5px 15px;
+}
+/*KNOWLEDGE BASE SEARCH FORM*/

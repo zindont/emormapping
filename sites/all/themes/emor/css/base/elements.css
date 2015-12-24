@@ -110,6 +110,18 @@ blockquote:after {
 blockquote > p:first-child {
   display: inline;
 }
+::-webkit-input-placeholder {
+   color: #1b5292;
+}
+:-moz-placeholder { /* Firefox 18- */
+   color: #1b5292;  
+}
+::-moz-placeholder {  /* Firefox 19+ */
+   color: #1b5292;  
+}
+:-ms-input-placeholder {  
+   color: #1b5292;  
+}
 .text-rtl{
   direction: rtl;
   unicode-bidi: bidi-override;

@@ -6,8 +6,6 @@ jQuery(document).ready(function ($) {
 	});
 	//Same height content in Mapping Home
 	var treeHeight = $('#content .index').height();
-	console.log(treeHeight);
-	console.log(treeHeight - $('#content .bubble-chart h2').outerHeight(true));
 	$('#content .bubble-chart img').outerHeight(treeHeight - $('#content .bubble-chart h2').outerHeight(true));
 	//END
 });
