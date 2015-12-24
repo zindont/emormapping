@@ -104,3 +104,30 @@
     width: 100%;
 }
 /*END INDEX TREE & BUBBLE CHART*/
+/*MAPPING GUIDE*/
+.path-frontpage #content .mapping-guide{
+	color: #1b5292;
+	margin: 30px 0;
+}
+.path-frontpage #content .mapping-guide .content{
+	display: inline-block;
+	vertical-align: sub;
+	font-weight: bold;
+}
+.path-frontpage #content .mapping-guide .fa{
+	font-style: italic;
+	font-weight: bold;
+	font-size: 20px;
+	border: 3px solid;
+	width: 50px;
+	height: 50px;
+	line-height: 50px;
+	margin: 10px;
+}
+.path-frontpage #content .mapping-guide h2{
+	margin: 0;
+}
+.path-frontpage #content .mapping-guide p{
+	margin: 0;
+}
+/*END MAPPING GUIDE*/
