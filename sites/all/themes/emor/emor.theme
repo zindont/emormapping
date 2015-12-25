@@ -12,7 +12,7 @@ use Drupal\Core\Template\Attribute;
  */
 function emor_preprocess_page(&$variables) {
   $theme = \Drupal::theme()->getActiveTheme()->getName();
-  $variables['theme_path'] = drupal_get_path('theme', $theme);
+  $variables['theme_path'] = base_path().drupal_get_path('theme', $theme);
 }
 
 /**
@@ -100,7 +100,7 @@ function emor_preprocess_block(&$variables) {
   if ($variables['attributes']['id'] === 'block-topnavbar'){
     //LOGO
     $theme = \Drupal::theme()->getActiveTheme()->getName();
-    $variables['theme_path'] = drupal_get_path('theme', $theme);      
+    $variables['theme_path'] = base_path().drupal_get_path('theme', $theme);      
     //SOCIAL ICON
     $variables['socials_menu'] = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree('socials');
   }
