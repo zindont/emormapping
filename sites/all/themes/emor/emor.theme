@@ -90,6 +90,8 @@ function emor_preprocess_maintenance_page(&$variables) {
  * Implements hook_preprocess_HOOK() for node.html.twig.
  */
 function emor_preprocess_node(&$variables) {
+  $theme = \Drupal::theme()->getActiveTheme()->getName();
+  $variables['theme_path'] = base_path().drupal_get_path('theme', $theme);
   // Remove the "Add new comment" link on teasers or when the comment form is
   // displayed on the page.
   if ($variables['teaser'] || !empty($variables['content']['comments']['comment_form'])) {
@@ -167,6 +169,13 @@ function emor_theme_suggestions_form_alter(array &$suggestions, array $variables
   if ($variables['element']['#form_id'] == 'search_block_form') {
     $suggestions[] = 'form__search_block_form';
   }
+
+  if ($variables['element']['#form_id'] == 'views_exposed_form') {
+    if ( isset($GLOBALS['emor']['views']['id']) && $GLOBALS['emor']['views']['id'] == 'emor_mapping_explore'){
+      $suggestions[] = 'form__emor_mapping_explore_filter';
+    }
+  }  
+  
 }
 
 /**
@@ -180,4 +189,23 @@ function emor_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_stat
     }
     $form[$key]['submit']['#attributes']->addClass('search-form__submit');
   }
+}
+
+function emor_preprocess_form(&$variables) {
+  $element = $variables['element'];
+  $variables['sort_by'] = $element['sort_by']['#options'];
+  $variables['filter_by'] = $element['#info'];
+  // echo '<pre>';
+  // var_dump($variables['filter_by']);
+  // echo '</pre>';
+
+  // if (isset($element['#action'])) {
+  //   $element['#attributes']['action'] = UrlHelper::stripDangerousProtocols($element['#action']);
+  // }
+  // Element::setAttributes($element, array('method', 'id'));
+  // if (empty($element['#attributes']['accept-charset'])) {
+  //   $element['#attributes']['accept-charset'] = "UTF-8";
+  // }
+  // $variables['attributes'] = $element['#attributes'];
+  // $variables['children'] = $element['#children'];
 }

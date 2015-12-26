@@ -49,7 +49,10 @@
 
   {% if exposed %}
     <div class="col-lg-3 view-filters">
-      {{ exposed }}
+      <div class="emor-mapping-filter">     
+          {{ exposed }}
+      </div>
+      
     </div>
   {% endif %}
   {% if attachment_before %}
@@ -60,6 +63,15 @@
 
   {% if rows %}
     <div class="col-lg-9 view-content">
+      <div class="breadcrumb">
+        <div class="path">
+          <span class="mapped-in">MAPPED IN: </span>
+          <span>Halacha &amp; Leadership</span><i class="fa fa-angle-double-right"></i>
+          <span>Halacha</span><i class="fa fa-angle-double-right"></i>
+          <span>Autonomy</span>
+          <i class="fa fa-search pull-right"></i>
+        </div>
+      </div>
       {{ rows }}
     </div>
   {% elseif empty %}
