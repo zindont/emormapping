@@ -43,7 +43,7 @@
   {% endif %}
   {{ title_suffix }}
   {% block content %}
-    <div{{ content_attributes.addClass('content') }}>
+    <div{{ content_attributes.addClass('content container') }}>
       {% if header_text %}
         {{ header_text | raw }}
       {% else %}

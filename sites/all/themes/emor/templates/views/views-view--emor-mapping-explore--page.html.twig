@@ -37,6 +37,7 @@
     'view-id-' ~ id,
     'view-display-id-' ~ display_id,
     dom_id ? 'js-view-dom-id-' ~ dom_id,
+    'row',
   ]
 %}
 <div{{ attributes.addClass(classes) }}>
@@ -45,9 +46,9 @@
     {{ title }}
   {% endif %}
   {{ title_suffix }}
-  
+
   {% if exposed %}
-    <div class="view-filters">
+    <div class="col-lg-3 view-filters">
       {{ exposed }}
     </div>
   {% endif %}
@@ -58,11 +59,11 @@
   {% endif %}
 
   {% if rows %}
-    <div class="view-content">
+    <div class="col-lg-9 view-content">
       {{ rows }}
     </div>
   {% elseif empty %}
-    <div class="view-empty">
+    <div class="col-lg-9 view-empty">
       {{ empty }}
     </div>
   {% endif %}
