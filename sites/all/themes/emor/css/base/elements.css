@@ -16,7 +16,9 @@ body {
   color: #1b5292;
   background-color: #e7ebee;
 }
-
+img {
+  max-width: 100%;
+}
 h1 a,
 h2 a {
   border-bottom: none;

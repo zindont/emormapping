@@ -120,9 +120,18 @@ function emor_preprocess_block(&$variables) {
       $variables['header_text'] = $tmp['display_options']['header']['area']['content']['value'];
     }
     $node = \Drupal::routeMatch()->getParameter('node');
+    
+    //Get header welcome text for node (Emor mapping article/audio/video)
     if ($node) {
-      // You can get nid and anything else you need from the node object.
-      var_dump($node->nid->value);
+      $emor_type_list = array(
+        'emor_mapping_article',
+        'emor_mapping_audio',
+        'emor_mapping_video');
+      $type = $node->type->target_id;
+      if(in_array($type, $emor_type_list)){
+        $block = \Drupal::entityManager()->getStorage('block_content')->load(8);
+        $variables['header_text'] = $block->body->value;
+      }
     }
   }
 
