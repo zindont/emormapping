@@ -97,6 +97,17 @@ function emor_preprocess_node(&$variables) {
   if ($variables['teaser'] || !empty($variables['content']['comments']['comment_form'])) {
     unset($variables['content']['links']['comment']['#links']['comment-add']);
   }
+
+  //Prepare content for Article 
+  $node = $variables['node'];
+  $emor_type_list = array(
+    'emor_mapping_article',
+    'emor_mapping_audio',
+    'emor_mapping_video');
+  $type = $node->type->target_id;
+  if(in_array($type, $emor_type_list)){
+    // var_dump($node->field_index_categories->value);
+  }
 }
 
 /**

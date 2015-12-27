@@ -73,7 +73,7 @@
 %}
 {{ attach_library('classy/node') }}
 <div{{ attributes.addClass(classes) }}>
-  <div class="row">
+  <div class="row header">
     <div class="col-lg-7 title-box">
       <h2 class="index-title">Autonomy</h2>
       <h1 class="node-title">{{ label }}</h1>
@@ -81,6 +81,68 @@
     </div>
     <div class="col-lg-5 img-box">
       <img src="{{theme_path}}/images/article-placeholder.jpg" alt="">
+    </div>
+    <div class="col-xs-12">
+      <div class="abstract">
+        <p class="text-uppercase"><strong>Abstract</strong></p>
+        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row content-details">
+    <div class="col-lg-8 details">
+      <div class="social-tab">
+        <div class="row">
+          <div class="col-xs-6 sharer">
+            <div class="icon share">
+             <i class="fa fa-share-alt"></i>
+             SHARE
+            </div>
+            <div class="icon">
+             <i class="fa fa-facebook"></i>
+            </div> 
+            <div class="icon">
+             <i class="fa fa-twitter"></i>
+            </div>
+            <div class="icon">
+             <i class="fa fa-google-plus"></i>
+            </div>
+            <div class="icon">
+             <i class="fa fa-pinterest-p"></i>
+            </div>
+            <div class="icon">
+             <i class="fa fa-print"></i>
+            </div>
+            <div class="icon">
+             <i class="fa fa-envelope-o"></i>
+            </div>              
+          </div>
+          <div class="col-xs-6 text-center notes-guide">
+            <i class="fa fa-info"></i><p>EMOR NOTES GUIDE</p>
+          </div>                                       
+        </div>
+      </div>
+      <div class="content">
+        {{content}}
+      </div>
+    </div>
+    <div class="col-lg-4 content-tabs">
+      <ul class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" href="#table-of-content">TABLE OF CONTENT</a></li>
+        <li><a data-toggle="tab" href="#emor-notes">EMOR NOTES</a></li>
+      </ul>
+
+      <div class="tab-content">
+        <div id="table-of-content" class="tab-pane fade in active">
+          <h3>HOME</h3>
+          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+        </div>
+        <div id="emor-notes" class="tab-pane fade">
+          <h3>Menu 1</h3>
+          <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>

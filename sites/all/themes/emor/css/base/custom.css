@@ -295,4 +295,95 @@
 .emor-article .title-box .author-name a{
 	color: #797979;
 }
+.emor-article .abstract{
+	border-width: 1px 0px;
+	border-style: solid;
+	color: #658cb6;
+	padding: 10px 0;
+}
+.emor-article .abstract p{
+	margin: 0;
+}
+.emor-article .content-details {
+	margin-top: 30px;
+}
+.emor-article .details {
+	padding-right: 0;
+}
+.emor-article .details .social-tab{
+	background-color: #f2f5f6;
+	max-height: 42px;
+}
+.emor-article .details .social-tab .icon.share{
+	padding: 0 15px;
+	width: auto;
+	background-color: #b7b6b6;
+	color: #FFF;
+}
+.emor-article .details .social-tab .icon{
+	text-align: center;
+	float:left;
+	width: 42px;
+	height: 42px;
+	border: 1px solid #b7b6b6;
+	color: #797979;
+}
+.emor-article .details .social-tab .icon .fa{
+	line-height: 42px;
+	font-size: 16px;
+}
+.emor-article .details .notes-guide i,
+.emor-article .details .notes-guide p{
+	display: inline-block;
+	line-height: 42px;
+	color: #797979;
+}
+.emor-article .details .notes-guide .fa{
+    font-style: italic;
+    border: 2px solid;
+    width: 32px;
+    height: 32px;
+    vertical-align: middle;
+    margin-right: 10px;
+    position: relative;
+}
+.emor-article .details .notes-guide .fa:before{
+	position: absolute;
+	top: -25%;
+	right: 12px;
+}
+.emor-article .details .notes-guide p{
+	font-weight: bold;
+	margin: 0;
+}
+.emor-article .content-tabs{
+	padding-left: 0;
+}
+.emor-article .content-tabs ul.nav li{
+	width: 50%;
+	text-align: center;
+}
+.emor-article .content-tabs ul.nav li>a{
+	border-radius: 0;
+	border-color: transparent;
+	background-color: #658cb6;
+	color: #FFF;
+	font-weight: bold;
+	margin-right: 0;
+}
+.emor-article .content-tabs ul.nav li.active>a,
+.emor-article .content-tabs ul.nav li>a:focus,
+.emor-article .content-tabs ul.nav li>a:hover{
+	background-color: #0b3564;
+}
+.emor-article .content-tabs .tab-content{
+	border: 1px solid #658cb6;
+	margin-top: -1px;
+}
+.emor-article .content-details .details .content{
+	padding: 15px 40px 15px 15px;
+	background-color: #f2f5f6;
+	margin-top: 50px;
+}
+
 /*END EMOR ARTICLE*/
