@@ -7,7 +7,7 @@
 
 use Drupal\Core\Template\Attribute;
 use Drupal\views\Views;
-
+use Drupal\node\Entity\Node;
 
 function emor_preprocess_views_view(&$variables){
   $GLOBALS['emor']['views']['id'] = $variables['id'];
@@ -116,8 +116,13 @@ function emor_preprocess_block(&$variables) {
   if ($variables['attributes']['id'] === 'block-headerwelcometext'){
     if ( isset($GLOBALS['emor']['views']['id']) && $GLOBALS['emor']['views']['id'] == 'emor_mapping_explore'){
       $tmp = \Drupal::service('entity.manager')->getStorage('view')->load('emor_mapping_explore');
-      $tmp = $tmp->getDisplay('page');
+      $tmp = $tmp->getDisplay('default');
       $variables['header_text'] = $tmp['display_options']['header']['area']['content']['value'];
+    }
+    $node = \Drupal::routeMatch()->getParameter('node');
+    if ($node) {
+      // You can get nid and anything else you need from the node object.
+      var_dump($node->nid->value);
     }
   }
 
