@@ -299,7 +299,11 @@
 	border-width: 1px 0px;
 	border-style: solid;
 	color: #658cb6;
-	padding: 10px 0;
+	padding: 20px 0;
+}
+.emor-article .abstract h2{
+	margin: 0;
+	font-size: 20px;
 }
 .emor-article .abstract p{
 	margin: 0;
@@ -411,6 +415,28 @@
 	border-width: 1px 0px;
 	border-style: solid;
 	color: #658cb6;
-	padding: 10px 0;
+	padding: 20px 0;
+	margin-top: 30px;
 }
+.emor-article .path-info>div{
+	padding: 0;
+}
+.emor-article .path-info h2{
+	font-size: 20px;
+	margin: 0;
+}
+.emor-article .path-info .info{
+	color: #5c5c5c;
+	font-weight: bold;
+}
+.emor-article .path-info .info .fa{
+	color: #658cb6;
+}
+.emor-article .path-info .path .breadcrumb{
+	background-color: transparent;
+	margin: 0;
+	padding: 0;
+}
+
+
 /*END EMOR ARTICLE*/
