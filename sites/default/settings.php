@@ -738,7 +738,7 @@ if ( !in_array($exIP, $whitelist) ){
 	  'username' => 'andeptrai',
 	  'password' => 'abc123',
 	  'prefix' => '',
-	  'host' => '116.98.110.213',
+	  'host' => 'sql.andeptrai.xyz',
 	  'port' => '223',
 	  'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
 	  'driver' => 'mysql',
