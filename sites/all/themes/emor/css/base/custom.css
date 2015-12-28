@@ -385,5 +385,32 @@
 	background-color: #f2f5f6;
 	margin-top: 50px;
 }
-
+.emor-article .content-tabs .content-tags .panel{
+	padding: 0;
+	border-radius: 0;
+	border: 0;
+}
+.emor-article .content-tabs .content-tags .panel .panel-heading{
+	padding: 0;
+	border-radius: 0;
+}
+.emor-article .content-tabs .content-tags .panel .panel-title{
+	text-align: center;
+	padding: 10px 15px;
+	font-weight: bold;
+	text-transform: uppercase;
+	font-size: 14px;
+	display: block;
+	background-color: #0b3564;
+	color: #FFF;
+}
+.emor-article .content-tabs .content-tags .panel .panel-collapse{
+	border: 1px solid #0b3564;
+}
+.emor-article .path-info{
+	border-width: 1px 0px;
+	border-style: solid;
+	color: #658cb6;
+	padding: 10px 0;
+}
 /*END EMOR ARTICLE*/
