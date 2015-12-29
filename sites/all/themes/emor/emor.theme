@@ -45,7 +45,6 @@ function emor_preprocess_html(&$variables) {
   if (!empty($variables['page']['featured_top'])) {
     $variables['attributes']['class'][] = 'has-featured-top';
   }
-
 }
 
 /**
@@ -106,7 +105,13 @@ function emor_preprocess_node(&$variables) {
     'emor_mapping_video');
   $type = $node->type->target_id;
   if(in_array($type, $emor_type_list)){
-    // var_dump($node->field_index_categories->value);
+    //Get Index Categories Name
+    $value = $node->get('field_index_categories')->getValue();
+    if (!empty($value)){
+      $value = \Drupal\taxonomy\Entity\Term::load($value['0']['target_id']);
+      $value = $value->get('name')->value;
+      $variables['content']['index_categories_name'] = $value;
+    }
   }
 }
 
@@ -233,4 +238,20 @@ function emor_preprocess_form(&$variables) {
   // }
   // $variables['attributes'] = $element['#attributes'];
   // $variables['children'] = $element['#children'];
+}
+
+function emor_preprocess_region(&$variables) {
+  // Create the $content variable that templates expect.
+  $node = \Drupal::routeMatch()->getParameter('node');
+  //Get header welcome text for node (Emor mapping article/audio/video)
+  if ($node) {
+    $emor_type_list = array(
+      'emor_mapping_article',
+      'emor_mapping_audio',
+      'emor_mapping_video');
+    $type = $node->type->target_id;
+    if(in_array($type, $emor_type_list)){
+      $variables['emor_node'] = true;
+    }
+  }  
 }

@@ -12,8 +12,13 @@
  * @see template_preprocess_region()
  */
 #}
+{%
+  set classes = [
+    not emor_node ? 'container',
+  ]
+%}
 {% if content %}
-  <div{{ attributes.addClass('container') }}>
+  <div{{ attributes.addClass(classes) }}>
     {{ content }}
   </div>
 {% endif %}

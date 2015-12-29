@@ -68,14 +68,15 @@
     not node.isPublished() ? 'node--unpublished',
     view_mode ? 'node--view-mode-' ~ view_mode|clean_class,
     'clearfix',
-    'emor-article'
+    'emor-article',
+    'container',
   ]
 %}
 {{ attach_library('classy/node') }}
 <div{{ attributes.addClass(classes) }}>
   <div class="row header">
     <div class="col-lg-7 title-box">
-      <h2 class="index-title">Autonomy</h2>
+      <h2 class="index-title">{{ content.index_categories_name }}</h2>
       <h1 class="node-title">{{ label }}</h1>
       <p class="author-name"><i>by {{author_name}}</i></p>
     </div>
@@ -150,7 +151,7 @@
         <div class="panel-group">
           <div class="panel panel-default">
             <div class="panel-heading">
-                <a class="panel-title" data-toggle="collapse" href="#collapse1">Collapsible panel</a>
+                <a class="panel-title" data-toggle="collapse" href="#collapse1">TAGS</a>
             </div>
             <div id="collapse1" class="panel-collapse collapse">
               <div class="panel-body">Tags, Tags, Tags, Tags, Tags, Tags, Tags, Tags,</div>
@@ -193,26 +194,28 @@
   </div>
 </div>
 
-<article{{ attributes.addClass(classes) }}>
-  <header>
-    {{ title_prefix }}
-    {% if not page %}
-      <h2{{ title_attributes.addClass('node__title') }}>
-        <a href="{{ url }}" rel="bookmark">{{ label }}</a>
-      </h2>
-    {% endif %}
-    {{ title_suffix }}
-    {% if display_submitted %}
-      <div class="node__meta">
-        {{ author_picture }}
-        <span{{ author_attributes }}>
-          {% trans %}Submitted by {{ author_name }} on {{ date }}{% endtrans %}
-        </span>
-        {{ metadata }}
+
+
+<div class="author-text-box">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-1 author-img">
+        <img src="{{theme_path}}/images/author.jpg" alt="">
       </div>
-    {% endif %}
-  </header>
-  <div{{ content_attributes.addClass('node__content', 'clearfix') }}>
-    {{ content }}
+      <div class="col-lg-10 author-quote">
+        <strong>Rav Jeffery Woolf</strong>
+        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has sur ...<strong>Readmore</strong></p>
+      </div>      
+    </div>
   </div>
-</article>
+</div>
+
+<div class="author-foot-notes">
+  <div class="container">
+    <h2 class="text-uppercase"><strong>Author’s FOOTNOTES</strong></h2>
+    <p>
+      1Lorem Ipsum is simply dummy text of the printing and typesetting industry.<br>
+      2Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. 
+    </p>
+  </div>
+</div>

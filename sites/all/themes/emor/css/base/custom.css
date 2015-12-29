@@ -204,6 +204,9 @@
 /*END KNOWLEDGE BASE SEARCH FORM*/
 
 /*EXPLORE GRID*/
+.emor-mapping-explore{
+	margin-top: 40px;
+}
 .path-emor-mapping-explore .view-filters {
 	background-color: #76a1c2;
 	padding: 45px 10px 10px;
@@ -275,6 +278,9 @@
 /*END EXPLORE GRID*/
 
 /*EMOR ARTICLE*/
+.emor-article{
+	margin-top: 40px;
+}
 .emor-article .title-box .index-title{
 	text-transform: uppercase;
 	color: #658cb6;
@@ -300,6 +306,7 @@
 	border-style: solid;
 	color: #658cb6;
 	padding: 20px 0;
+	margin: 30px 0;
 }
 .emor-article .abstract h2{
 	margin: 0;
@@ -307,9 +314,6 @@
 }
 .emor-article .abstract p{
 	margin: 0;
-}
-.emor-article .content-details {
-	margin-top: 30px;
 }
 .emor-article .details {
 	padding-right: 0;
@@ -416,7 +420,7 @@
 	border-style: solid;
 	color: #658cb6;
 	padding: 20px 0;
-	margin-top: 30px;
+	margin: 30px 0;
 }
 .emor-article .path-info>div{
 	padding: 0;
@@ -437,6 +441,48 @@
 	margin: 0;
 	padding: 0;
 }
-
-
+.author-text-box{
+	padding: 15px;
+	background-color: #658cb6;
+	color: #FFF;
+}
+.author-text-box .author-img{
+	padding-right: 0;
+}
+.author-foot-notes{
+	color: #5c5c5c;
+	padding: 20px;
+}
+.author-foot-notes h2{
+	font-size: 20px;
+	margin: 0;
+}
+.author-foot-notes p{
+	margin: 0;
+}
 /*END EMOR ARTICLE*/
+
+/*EMOR AUDIO*/
+.emor-article .content-tabs ul.nav li{
+	width: 33.3333%;
+}
+.emor-article .content-details .details .content.audio{
+	height: 500px;
+	position: relative;
+}
+.emor-article .content-details .details .content.audio:before{
+	content: '\f027';
+	font-family: FontAwesome;
+	position: absolute;
+	font-size: 50px;
+	top: 43%;
+	left: 46%;
+	color: #a0a0a0;
+	line-height: 1;
+	width: 50px;
+	height: 50px;
+	background-color: #e8e9e9;
+	border-radius: 50%;
+	text-align: center;
+}
+/*END EMOR AUDIO*/

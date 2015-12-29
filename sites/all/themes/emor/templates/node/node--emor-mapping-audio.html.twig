@@ -1,0 +1,214 @@
+{#
+/**
+ * @file
+ * Bartik's theme implementation to display a node.
+ *
+ * Available variables:
+ * - node: The node entity with limited access to object properties and methods.
+     Only "getter" methods (method names starting with "get", "has", or "is")
+     and a few common methods such as "id" and "label" are available. Calling
+     other methods (such as node.delete) will result in an exception.
+ * - label: The title of the node.
+ * - content: All node items. Use {{ content }} to print them all,
+ *   or print a subset such as {{ content.field_example }}. Use
+ *   {{ content|without('field_example') }} to temporarily suppress the printing
+ *   of a given child element.
+ * - author_picture: The node author user entity, rendered using the "compact"
+ *   view mode.
+ * - metadata: Metadata for this node.
+ * - date: Themed creation date field.
+ * - author_name: Themed author name field.
+ * - url: Direct URL of the current node.
+ * - display_submitted: Whether submission information should be displayed.
+ * - attributes: HTML attributes for the containing element.
+ *   The attributes.class element may contain one or more of the following
+ *   classes:
+ *   - node: The current template type (also known as a "theming hook").
+ *   - node--type-[type]: The current node type. For example, if the node is an
+ *     "Article" it would result in "node--type-article". Note that the machine
+ *     name will often be in a short form of the human readable label.
+ *   - node--view-mode-[view_mode]: The View Mode of the node; for example, a
+ *     teaser would result in: "node--view-mode-teaser", and
+ *     full: "node--view-mode-full".
+ *   The following are controlled through the node publishing options.
+ *   - node--promoted: Appears on nodes promoted to the front page.
+ *   - node--sticky: Appears on nodes ordered above other non-sticky nodes in
+ *     teaser listings.
+ *   - node--unpublished: Appears on unpublished nodes visible only to site
+ *     admins.
+ * - title_attributes: Same as attributes, except applied to the main title
+ *   tag that appears in the template.
+ * - content_attributes: Same as attributes, except applied to the main
+ *   content tag that appears in the template.
+ * - author_attributes: Same as attributes, except applied to the author of
+ *   the node tag that appears in the template.
+ * - title_prefix: Additional output populated by modules, intended to be
+ *   displayed in front of the main title tag that appears in the template.
+ * - title_suffix: Additional output populated by modules, intended to be
+ *   displayed after the main title tag that appears in the template.
+ * - view_mode: View mode; for example, "teaser" or "full".
+ * - teaser: Flag for the teaser state. Will be true if view_mode is 'teaser'.
+ * - page: Flag for the full page state. Will be true if view_mode is 'full'.
+ * - readmore: Flag for more state. Will be true if the teaser content of the
+ *   node cannot hold the main body content.
+ * - logged_in: Flag for authenticated user status. Will be true when the
+ *   current user is a logged-in member.
+ * - is_admin: Flag for admin user status. Will be true when the current user
+ *   is an administrator.
+ *
+ * @see template_preprocess_node()
+ */
+#}
+{%
+  set classes = [
+    'node',
+    'node--type-' ~ node.bundle|clean_class,
+    node.isPromoted() ? 'node--promoted',
+    node.isSticky() ? 'node--sticky',
+    not node.isPublished() ? 'node--unpublished',
+    view_mode ? 'node--view-mode-' ~ view_mode|clean_class,
+    'clearfix',
+    'emor-article',
+    'emor-audio',
+    'container',
+  ]
+%}
+{{ attach_library('classy/node') }}
+<div{{ attributes.addClass(classes) }}>
+  <div class="row header">
+    <div class="col-lg-7 title-box">
+      <h2 class="index-title">{{ content.index_categories_name }}</h2>
+      <h1 class="node-title">{{ label }}</h1>
+      <p class="author-name"><i>by {{author_name}}</i></p>
+    </div>
+    <div class="col-lg-5 img-box">
+      <img src="{{theme_path}}/images/article-placeholder.jpg" alt="">
+    </div>
+    <div class="col-xs-12">
+      <div class="abstract">
+        <h2 class="text-uppercase"><strong>Abstract</strong></h2>
+        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row content-details">
+    <div class="col-lg-8 details">
+      <div class="social-tab">
+        <div class="row">
+          <div class="col-xs-6 sharer">
+            <div class="icon share">
+             <i class="fa fa-share-alt"></i>
+             SHARE
+            </div>
+            <div class="icon">
+             <i class="fa fa-facebook"></i>
+            </div> 
+            <div class="icon">
+             <i class="fa fa-twitter"></i>
+            </div>
+            <div class="icon">
+             <i class="fa fa-google-plus"></i>
+            </div>
+            <div class="icon">
+             <i class="fa fa-pinterest-p"></i>
+            </div>
+            <div class="icon">
+             <i class="fa fa-print"></i>
+            </div>
+            <div class="icon">
+             <i class="fa fa-envelope-o"></i>
+            </div>              
+          </div>
+          <div class="col-xs-6 text-center notes-guide">
+            <i class="fa fa-info"></i><p>EMOR NOTES GUIDE</p>
+          </div>                                       
+        </div>
+      </div>
+      <div class="content audio">
+        {{content}}
+      </div>
+    </div>
+    <div class="col-lg-4 content-tabs">
+      <div class="content-table">
+        <ul class="nav nav-tabs">
+          <li class="active"><a data-toggle="tab" href="#synopsis">SYNOPSIS</a></li>
+          <li><a data-toggle="tab" href="#tags">TAGS</a></li>
+          <li><a data-toggle="tab" href="#keywords">KEYWORDS</a></li>
+        </ul>
+
+        <div class="tab-content">
+          <div id="synopsis" class="tab-pane fade in active">
+            <h3>HOME synopsis</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+          </div>
+          <div id="tags" class="tab-pane fade">
+              <div class="panel-body">Tags, Tags, Tags, Tags, Tags, Tags, Tags, Tags,</div>
+              <div class="panel-footer">
+                Article name by author<br>
+                Article name by author<br>
+                Article name by author<br>
+                Article name by author<br>
+                Article name by author<br>                                                            
+              </div>
+          </div>
+          <div id="keywords" class="tab-pane fade">
+            <h3>Menu 1 keywords</h3>
+            <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+          </div>          
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="path-info clearfix">
+        <div class="col-lg-8 path">
+          
+          <h2 class="text-uppercase"><strong>Mapped In</strong></h2>
+          <div class="breadcrumb">
+
+              <span>Halacha &amp; Leadership</span><i class="fa fa-angle-double-right"></i>
+              <span>Halacha</span><i class="fa fa-angle-double-right"></i>
+              <span>Autonomy</span>
+
+          </div> 
+
+        </div>
+        <div class="col-lg-4 info text-right">
+          <h2 class="text-uppercase"><strong>Published</strong></h2>
+          {% trans %} <i class="fa fa-calendar"></i> {{ date }} {% endtrans %}
+        </div>
+        
+      </div>
+    </div>    
+  </div>
+</div>
+
+
+
+<div class="author-text-box">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-1 author-img">
+        <img src="{{theme_path}}/images/author.jpg" alt="">
+      </div>
+      <div class="col-lg-10 author-quote">
+        <strong>Rav Jeffery Woolf</strong>
+        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has sur ...<strong>Readmore</strong></p>
+      </div>      
+    </div>
+  </div>
+</div>
+
+<div class="author-foot-notes">
+  <div class="container">
+    <h2 class="text-uppercase"><strong>Author’s FOOTNOTES</strong></h2>
+    <p>
+      1Lorem Ipsum is simply dummy text of the printing and typesetting industry.<br>
+      2Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. 
+    </p>
+  </div>
+</div>
