@@ -97,7 +97,8 @@ function emor_preprocess_node(&$variables) {
     unset($variables['content']['links']['comment']['#links']['comment-add']);
   }
 
-  //Prepare content for Article 
+  //Prepare content for Article
+  $variables['content']['index_categories_name'] = '';
   $node = $variables['node'];
   $emor_type_list = array(
     'emor_mapping_article',
@@ -140,12 +141,12 @@ function emor_preprocess_block(&$variables) {
     //Get header welcome text for node (Emor mapping article/audio/video)
     if ($node) {
       $emor_type_list = array(
-        'emor_mapping_article',
-        'emor_mapping_audio',
-        'emor_mapping_video');
+        8 => 'emor_mapping_article',
+        9 => 'emor_mapping_audio',
+        10 => 'emor_mapping_video');
       $type = $node->type->target_id;
       if(in_array($type, $emor_type_list)){
-        $block = \Drupal::entityManager()->getStorage('block_content')->load(8);
+        $block = \Drupal::entityManager()->getStorage('block_content')->load(array_search($type, $emor_type_list));
         $variables['header_text'] = $block->body->value;
       }
     }

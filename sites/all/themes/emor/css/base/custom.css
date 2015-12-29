@@ -462,15 +462,16 @@
 }
 /*END EMOR ARTICLE*/
 
-/*EMOR AUDIO*/
-.emor-article .content-tabs ul.nav li{
+/*EMOR AUDIO/VIDEO*/
+.emor-audio .content-tabs ul.nav li,
+.emor-video .content-tabs ul.nav li{
 	width: 33.3333%;
 }
-.emor-article .content-details .details .content.audio{
+.emor-audio .content-details .details .content.audio{
 	height: 500px;
 	position: relative;
 }
-.emor-article .content-details .details .content.audio:before{
+.emor-audio .content-details .details .content.audio:before{
 	content: '\f027';
 	font-family: FontAwesome;
 	position: absolute;
@@ -485,4 +486,4 @@
 	border-radius: 50%;
 	text-align: center;
 }
-/*END EMOR AUDIO*/
+/*END EMOR AUDIO/VIDEO*/
