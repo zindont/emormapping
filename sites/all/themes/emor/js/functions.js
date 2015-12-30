@@ -25,6 +25,7 @@ jQuery(document).ready(function ($) {
 		}
 	});
 	$(window).on('click', collapseIndexTree);
+	$('body').on('click', collapseKnowledgeBase);
 
 	$('#block-bubblechart').on('click',function(){
 		if ($(this).hasClass('col-lg-8')){
@@ -55,7 +56,20 @@ jQuery(document).ready(function ($) {
 			
 		}
 	});	
+
+	$('#block-knowledgebase .list-menu, #block-knowledgebase .search ').on('click',function(){
+		var parentBlockID = '#block-knowledgebase'; 
+		if ($(parentBlockID).hasClass('col-lg-8')){
+			$('.mapping-home-item').not($(parentBlockID)).hide('fast',function(){
+				$(parentBlockID).removeClass('col-lg-8').addClass('col-lg-10 expanded');
+			});
+		}
+	});		
 });
+
+function collapseKnowledgeBase(e){
+	console.log(jQuery(e.target));
+}
 
 function collapseIndexTree(){
 	if( (!jQuery('#block-indextree .nav>li').hasClass('open')) & jQuery('#block-indextree').hasClass('expanded') ) {

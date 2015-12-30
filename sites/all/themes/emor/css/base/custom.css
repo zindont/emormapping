@@ -182,6 +182,9 @@ li.dropdown.open:before {
 }
 /*END INDEX SEARCH FORM*/
 /*KNOWLEDGE BASE SEARCH FORM*/
+.path-frontpage #content .knowledge-base .border-top{
+	display: none;
+}
 .path-frontpage #content .knowledge-base .search{
 	padding-left: 5px;
 }
@@ -222,6 +225,46 @@ li.dropdown.open:before {
 }
 .path-frontpage #content .knowledge-base .list-menu .nav-pills>li>a{
 	padding: 13.5px 15px;
+	border-radius: 0;
+}
+
+.path-frontpage #content .knowledge-base.expanded .list-menu>.nav>li>ul.dropdown-menu{
+	position: relative;
+	display: block !important;
+	width: 100%;
+	border: 0;
+	border-radius: 0;
+	padding: 0;
+	margin: 0;
+}
+.path-frontpage #content .knowledge-base.expanded .list-menu{
+	margin-top: 55px;
+	width: 33.33333333%;
+}
+.path-frontpage #content .knowledge-base.expanded .list-menu>.nav>li>ul.dropdown-menu li{
+	position: relative;
+}
+.path-frontpage #content .knowledge-base.expanded .list-menu>.nav>li>ul.dropdown-menu li a{
+	padding: 18.5px 15px;
+	border-radius: 0;
+}
+.path-frontpage #content .knowledge-base.expanded .list-menu>.nav>li>ul.dropdown-menu li .dropdown-menu{
+    position: absolute;
+    top: 0;
+    left: 100%; 	
+}
+.path-frontpage #content .knowledge-base.expanded .search{
+	left: -33.33333333%;
+	margin-left: 10px;
+	width: 33.33333333%;
+}
+.path-frontpage #content .knowledge-base.expanded .border-top{
+    border-top: 1px solid #FFF;
+	position: absolute;
+    display: block;
+    width: 90%;
+    margin: 0;
+    right: 0;
 }
 /*END KNOWLEDGE BASE SEARCH FORM*/
 
