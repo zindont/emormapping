@@ -45,6 +45,17 @@
 /*END HEADER WELCOME*/
 
 /*INDEX TREE & BUBBLE CHART*/
+.info-tooltip{
+	position: absolute;
+	right: 20px;
+	font-weight: normal;
+	font-size: 20px;
+	font-style: italic;
+	width: 30px;
+	height: 30px;
+	border: 2px solid #FFF;
+	line-height: 30px;
+}
 .path-frontpage #content{
 	color: #FFF;
 }
@@ -552,3 +563,48 @@ li.dropdown.open:before {
 	text-align: center;
 }
 /*END EMOR AUDIO/VIDEO*/
+
+/*INDEX RIGHT MENU*/
+.right-menu {
+	display: none;
+}
+.right-menu .item{
+	position: relative;
+	width: 90px;
+	height: 90px;
+	background-color: #bcd4e6;
+	margin: 0 auto 50px auto;
+	cursor: pointer;
+	border: 10px solid #76a1c2;
+	font-size: 40px;
+	font-weight: bold;
+	line-height: 70px;
+	text-align: center;
+}
+.right-menu .item p{
+	font-size: 14px;
+	margin: 0;
+	position: absolute;
+	line-height: 3;
+	white-space: nowrap;
+	color: #76a1c2;
+	text-align: center;
+	left: 50%;
+    transform: translateX(-50%);
+}
+.right-menu .item.button-bubblechart img{
+	width: 90%;
+	height: auto;
+}
+/*END INDEX RIGHT MENU*/
+
+/*FOOTER*/
+.site-footer .article-text{
+	background-color: #76A1C3;
+	padding: 60px 10px 10px;
+}
+.site-footer .article-text .text-box{
+	background-color: #E7E7E7;
+	padding: 10px 15px;
+}
+/*END FOOTER*/

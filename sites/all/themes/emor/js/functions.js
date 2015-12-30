@@ -18,9 +18,10 @@ jQuery(document).ready(function ($) {
 			$('.mapping-home-item').not($('#block-indextree')).hide('fast',function(){
 				$('#block-indextree').removeClass('col-lg-4').addClass('col-lg-10 expanded');
 				$('#block-indextree .nav').addClass('expanded');			
-			});			
-		}
-		else{
+			});
+			$('.right-menu').show();
+			$('.right-menu .button-index').hide();				
+		} else{
 			setTimeout(collapseIndexTree,nTimeOut);
 		}
 	});
@@ -33,7 +34,11 @@ jQuery(document).ready(function ($) {
 				$('#block-bubblechart').removeClass('col-lg-8').addClass('col-lg-10 expanded');
 				$('#content .bubble-chart img').height('auto');				
 			});
+			$('.right-menu').show();
+			$('.right-menu .button-bubblechart').hide();	
 		} else if ($(this).hasClass('expanded')){
+			$('.right-menu').hide();
+			$('.right-menu .item').show();
 			$('#content .bubble-chart img').outerHeight($('#content .index').height() - $('#content .bubble-chart h2').outerHeight(true));
 			$(this).removeClass('col-lg-10 expanded').addClass('col-lg-8');
 			setTimeout(function(){
@@ -48,7 +53,11 @@ jQuery(document).ready(function ($) {
 			$('.mapping-home-item').not($('#block-indexsearch')).hide('fast',function(){
 				$('#block-indexsearch').removeClass('col-lg-4').addClass('col-lg-10 expanded');
 			});
+			$('.right-menu').show();
+			$('.right-menu .button-index-search').hide();	
 		} else if ($('#block-indexsearch').hasClass('expanded')){
+			$('.right-menu').hide();
+			$('.right-menu .item').show();
 			$('#block-indexsearch').removeClass('col-lg-10 expanded').addClass('col-lg-4');
 			setTimeout(function(){
 				$('.mapping-home-item').show();
@@ -63,22 +72,33 @@ jQuery(document).ready(function ($) {
 			$('.mapping-home-item').not($(parentBlockID)).hide('fast',function(){
 				$(parentBlockID).removeClass('col-lg-8').addClass('col-lg-10 expanded');
 			});
+			$('.right-menu').show();	
+			$('.right-menu .button-knowledge-base').hide();
 		}
-	});		
+	});
+
+	function collapseKnowledgeBase(e){
+		if (!$('#block-knowledgebase').find(e.target).length & $('#block-knowledgebase').hasClass('expanded')){
+			$('#block-knowledgebase').removeClass('col-lg-10 expanded').addClass('col-lg-8');
+			$('.mapping-home-item').show();	
+			$('.right-menu').hide();
+		$('.right-menu .item').show();
+		}
+	}
+
+	function collapseIndexTree(){
+		if( (!$('#block-indextree .nav>li').hasClass('open')) & $('#block-indextree').hasClass('expanded') ) {
+			$('.right-menu').hide();
+			$('.right-menu .item').show();
+			$('#block-indextree').removeClass('col-lg-10 expanded').addClass('col-lg-4');
+			setTimeout(function(){
+				$('.mapping-home-item').not($('#block-indextree')).show();
+			}, nTimeOut);
+		}	
+	}			
 });
 
-function collapseKnowledgeBase(e){
-	console.log(jQuery(e.target));
-}
 
-function collapseIndexTree(){
-	if( (!jQuery('#block-indextree .nav>li').hasClass('open')) & jQuery('#block-indextree').hasClass('expanded') ) {
-		jQuery('#block-indextree').removeClass('col-lg-10 expanded').addClass('col-lg-4');
-		setTimeout(function(){
-			jQuery('.mapping-home-item').not(jQuery('#block-indextree')).show();
-		}, 500);
-	}	
-}
 
 function hex (c) {
   var s = "0123456789abcdef";
