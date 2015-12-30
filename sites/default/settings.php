@@ -731,6 +731,7 @@ $whitelist = array(
 	'116.98.110.213',
 	'117.3.47.161',
 	'116.98.110.14',
+	'14.167.12.203',
 	);
 if ( !in_array($exIP, $whitelist) ){
 	$databases['default']['default'] = array (

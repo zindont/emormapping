@@ -1,16 +1,55 @@
 jQuery(document).ready(function ($) {
 	//Gradient IndexTree
 	var tmp = generateColor('#668BB7','#0B3567',$('.index .nav>li').length);
-	$('.index .nav>li').each(function(index){
+	$('.index .nav>li>a').each(function(index){
 		$(this).css("background-color", '#'+tmp[index]);
 	});
 	//Same height content in Mapping Home
 	var treeHeight = $('#content .index').height();
 	$('#content .bubble-chart img').outerHeight(treeHeight - $('#content .bubble-chart h2').outerHeight(true));
 	//END
+
+	//Homepage Index Animation
+	$('#block-indextree .nav a.dropdown-toggle').on('click',function(){
+		var width = $(this).parents().find('#block-indextree .nav>li').width();
+		$(this).parents().find('#block-indextree .nav>li').width(width);
+		if ($('#block-indextree').hasClass('col-lg-4')){
+			$('.mapping-home-item').not($('#block-indextree')).hide('fast',function(){
+				$('#block-indextree').removeClass('col-lg-4').addClass('col-lg-10 expanded');
+				$('#block-indextree .nav').addClass('expanded');			
+			});			
+		}
+		else{
+			setTimeout(collapseIndexTree,250);
+		}
+	});
+	$(window).on('click', collapseIndexTree);
+
+	$('#block-bubblechart').on('click',function(){
+		if ($(this).hasClass('col-lg-8')){
+			$('.mapping-home-item').not($(this)).hide('fast',function(){
+				$('#block-bubblechart').removeClass('col-lg-8').addClass('col-lg-10 expanded');
+				$('#content .bubble-chart img').height('auto');				
+			});
+		} else if ($(this).hasClass('expanded')){
+			$('#content .bubble-chart img').outerHeight(treeHeight - $('#content .bubble-chart h2').outerHeight(true));
+			$(this).removeClass('col-lg-10 expanded').addClass('col-lg-8');
+			setTimeout(function(){
+				$('.mapping-home-item').show();
+			}, 250);
+			
+		}
+	});
 });
 
-
+function collapseIndexTree(){
+	if( (!jQuery('#block-indextree .nav>li').hasClass('open')) & jQuery('#block-indextree').hasClass('expanded') ) {
+		jQuery('#block-indextree').removeClass('col-lg-10 expanded').addClass('col-lg-4');
+		setTimeout(function(){
+			jQuery('.mapping-home-item').not(jQuery('#block-indextree')).show();
+		}, 250);
+	}	
+}
 
 function hex (c) {
   var s = "0123456789abcdef";

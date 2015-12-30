@@ -4,6 +4,12 @@
     font-family: 'Aileron';
     src: url(../../fonts/Aileron-Regular.otf);
 }
+* {
+  -webkit-transition: all 250ms ease-out;
+  -moz-transition: all 250ms ease-out;
+  -o-transition: all 250ms ease-out;
+  transition: all 250ms ease-out;     
+}
 html {
   height: 100%;
 }

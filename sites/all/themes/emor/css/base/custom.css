@@ -10,6 +10,8 @@
 	text-transform: uppercase;
 	font-weight: bold;
 	color: #FFF;
+	font-size: 13px;
+	white-space: nowrap;
 }
 .navbar-brand{
 	padding: 8.5px 20px 8.5px 0;
@@ -90,11 +92,15 @@
 	float: right;
 }
 .path-frontpage #content .index .nav>li .dropdown-menu{
+	top: 0;
 	right: 0;
 	left: 100%;
+	margin-top: 0;
 	border-radius: 0;
 	background-color: #0B3567;
 	border: 1px solid #ccc;
+	-webkit-box-shadow: none;
+    box-shadow: none;
 }
 .path-frontpage #content .index .nav>li .dropdown-menu a{
 	color: #FFF;
@@ -107,6 +113,22 @@
     background-color: #BCD3E8;
     padding: 15px;
     width: 100%;
+}
+.path-frontpage #content .index .nav.expanded{
+	border-top: 1px solid #FFF;
+}
+.path-frontpage #content .index .nav.expanded>li:first-child{
+	margin-top: -1px;
+}
+.path-frontpage #content .index.expanded{
+	padding-right: 0;
+}
+li.dropdown.open:before {
+    border-top: 1px solid #FFF;
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
 }
 /*END INDEX TREE & BUBBLE CHART*/
 /*MAPPING GUIDE*/
