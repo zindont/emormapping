@@ -27,26 +27,53 @@
  * @ingroup themeable
  */
 #}
-<div{{ attributes.addClass('col-lg-4 index mapping-home-item') }}>
-  {{ title_prefix }}
-  {% if label %}
-    <h2{{ title_attributes }}>{{ label }}</h2>
-  {% endif %}
-  {{ title_suffix }}
-  {% block content %}
-    {#{ content }#}
-    <h2 class="text-center">Index<i class="fa fa-info info-tooltip"></i></h2>
-	  <ul class="nav nav-pills nav-stacked">
-	    {% for key,item in index_tree %}
-	        <li class="dropdown">
-	        	<a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="cate-color fa fa-stop" style="color: {{ item.color }}"></span>{{ item.name }} <span class="fa fa-angle-right"></span></a>
-		      	<ul class="dropdown-menu">
-		        	<li><a href="emor-mapping-explore">Submenu 1-1</a></li>
-		      	  	<li><a href="emor-mapping-explore">Submenu 1-2</a></li>
-		     	   	<li><a href="emor-mapping-explore">Submenu 1-3</a></li>                        
-	     	 	</ul>	        	
-        	</li>
-	    {% endfor %}	    
-	  </ul>
-  {% endblock %}
-</div>
+
+
+
+{% import _self as index %}
+{{ index.print(index_tree, attributes, 0) }}
+
+{% macro print(cate_array, attributes, depth, parent) %}
+
+	{% import _self as index %}
+	{% if depth == 0 %}
+		<div{{ attributes.addClass('col-lg-4 index mapping-home-item') }}>
+			{{ title_prefix }}
+			{% if label %}
+				<h2{{ title_attributes }}>{{ label }}</h2>
+			{% endif %}
+			{{ title_suffix }}
+			{% block content %}
+			    <h2 class="text-center">Index<i class="fa fa-info info-tooltip"></i></h2>
+				  <ul class="nav nav-pills nav-stacked">
+
+				    {% for key,item in cate_array if item.depth == depth %}
+					        <li class="dropdown">
+					        	<a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="cate-color fa fa-stop" style="color: {{ item.color }}"></span>{{ item.name }} <span class="fa fa-angle-right"></span></a>
+						      	<ul class="dropdown-menu">
+						      		{{ index.print(cate_array, attributes, depth + 1, item.tid) }}
+					     	 	</ul>	        	
+				        	</li>				
+				    {% endfor %}	
+
+				  </ul>
+				{% endblock %}
+		</div>
+    {% else %}
+		{% for key,item in cate_array if item.parents.0 == parent %}
+			{% if item.hasChildren %}
+	        	<li class="dropdown-submenu">
+        			<a class="dropdown-toggle" data-toggle="dropdown" href="#">{{ item.name }}</a>
+			      	<ul class="dropdown-menu">
+						{{ index.print(cate_array, attributes, depth + 1, item.tid) }}
+		     	 	</ul>			        		
+	        	</li>				
+			{% else %}
+				<li><a href="emor-mapping-explore">{{ item.name }}</a></li>
+			{% endif %}
+			
+		{% endfor %}
+    {% endif %}
+
+
+{% endmacro %}

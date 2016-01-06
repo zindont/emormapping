@@ -8,6 +8,7 @@
 use Drupal\Core\Template\Attribute;
 use Drupal\views\Views;
 use Drupal\node\Entity\Node;
+use Drupal\taxonomy\TermStorage;
 
 function emor_preprocess_views_view(&$variables){
   $GLOBALS['emor']['views']['id'] = $variables['id'];
@@ -155,12 +156,20 @@ function emor_preprocess_block(&$variables) {
   //Prepare for Index Tree
   if ($variables['attributes']['id'] === 'block-indextree'){
     $variables['index_tree'] = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree('index_categories');
+    $max_depth = 0;
 
     foreach ($variables['index_tree'] as $key => $value) {
       $temp = \Drupal\taxonomy\Entity\Term::load($value->tid);
       $variables['index_tree'][$key]->color = $temp->get('field_category_color')->color;
+      //Getchildrens
+      $children = \Drupal::entityManager()->getStorage('taxonomy_term')->loadChildren($value->tid);
+      $variables['index_tree'][$key]->hasChildren = (!empty($children)) ? true : false;
+      //Get max depth
+      if ($value->depth > $max_depth)
+        $max_depth = $value->depth;
     }
-    // $variables['index_tree'] = \Drupal\taxonomy\Entity\Vocabulary::load('index_categories');
+    $variables['max_depth'] = $max_depth;  
+    // var_dump($variables['index_tree']);exit();  
   }
 
   // Add a clearfix class to system branding blocks.
