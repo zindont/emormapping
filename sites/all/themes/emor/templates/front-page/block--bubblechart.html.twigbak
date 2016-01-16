@@ -27,6 +27,10 @@
  * @ingroup themeable
  */
 #}
+<?php 
+$entity_object = NodeType::load("author");
+dpm($entity_object); //Work perfectly
+?>
 <div{{ attributes.addClass('col-lg-8 bubble-chart mapping-home-item') }}>
   {{ title_prefix }}
   {% if label %}
@@ -35,23 +39,6 @@
   {{ title_suffix }}
   {% block content %}
     <h2 class="text-center">Bubble Chart<i class="fa fa-info info-tooltip"></i></h2>
-    <div id="bubbleChartContainer" style="min-width: 310px; max-width: 600px; height: 400px; margin: 0 auto; display:none;"></div>
-    {#
-    <ul>
-      {% for author in authors %}
-          <li>{{ author.title.value|e }}</li>
-          <li>{{ author.created.value|date("d/m/Y") }}</li>
-          <li>{{ author.field_email.value|e }}</li>
-      {% endfor %}
-    </ul>
-    <ul>
-      {% for article in articles %}
-          <li>{{ article.title.value|e }}</li>
-          <li>{{ article.created.value|date("d/m/Y") }}</li>
-          <li>{{ article.field_author.value|e }}</li>
-      {% endfor %}
-    </ul>
-    #}
 	{{ content }}
   {% endblock %}
 </div>

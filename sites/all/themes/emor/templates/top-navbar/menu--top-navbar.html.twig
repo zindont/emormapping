@@ -49,11 +49,12 @@
         {% endif %}
       </li>
     {% endfor %}
-      <li class="dropdown">
+      <li class="search dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><i class="fa fa-search"></i></a>
-                <ul class="dropdown-menu">
-                  <li>SEARCH FORM HERE</li>
-                </ul>
+                <div class="dropdown-menu">
+                    <input type="text" class="form-control search" placeholder="Search for...">
+                    <button class="fa fa-times btn btn-default btn-clear" type="button"></button>                
+                </div>
       </li>
     </ul>
   {% endif %}
