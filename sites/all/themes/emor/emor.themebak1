@@ -1,0 +1,406 @@
+<?php
+
+/**
+ * @file
+ * Functions to support theming in the Bartik theme.
+ */
+
+use Drupal\Core\Template\Attribute;
+use Drupal\views\Views;
+use Drupal\node\Entity\Node;
+use Drupal\taxonomy\TermStorage;
+
+function emor_preprocess_views_view(&$variables){
+  $GLOBALS['emor']['views']['id'] = $variables['id'];
+}
+/**
+ * Implements template_preprocess_page().
+ */
+function emor_preprocess_page(&$variables) {
+  $theme = \Drupal::theme()->getActiveTheme()->getName();
+  $variables['theme_path'] = base_path().drupal_get_path('theme', $theme);
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for HTML document templates.
+ *
+ * Adds body classes if certain regions have content.
+ */
+function emor_preprocess_html(&$variables) {  
+  // Add information about the number of sidebars.
+  if (!empty($variables['page']['sidebar_first']) && !empty($variables['page']['sidebar_second'])) {
+    $variables['attributes']['class'][] = 'layout-two-sidebars';
+  }
+  elseif (!empty($variables['page']['sidebar_first'])) {
+    $variables['attributes']['class'][] = 'layout-one-sidebar';
+    $variables['attributes']['class'][] = 'layout-sidebar-first';
+  }
+  elseif (!empty($variables['page']['sidebar_second'])) {
+    $variables['attributes']['class'][] = 'layout-one-sidebar';
+    $variables['attributes']['class'][] = 'layout-sidebar-second';
+  }
+  else {
+    $variables['attributes']['class'][] = 'layout-no-sidebars';
+  }
+
+  if (!empty($variables['page']['featured_top'])) {
+    $variables['attributes']['class'][] = 'has-featured-top';
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for page templates.
+ */
+function emor_preprocess_page_title(&$variables) {
+  // Since the title and the shortcut link are both block level elements,
+  // positioning them next to each other is much simpler with a wrapper div.
+  if (!empty($variables['title_suffix']['add_or_remove_shortcut']) && $variables['title']) {
+    // Add a wrapper div using the title_prefix and title_suffix render
+    // elements.
+    $variables['title_prefix']['shortcut_wrapper'] = array(
+      '#markup' => '<div class="shortcut-wrapper clearfix">',
+      '#weight' => 100,
+    );
+    $variables['title_suffix']['shortcut_wrapper'] = array(
+      '#markup' => '</div>',
+      '#weight' => -99,
+    );
+    // Make sure the shortcut link is the first item in title_suffix.
+    $variables['title_suffix']['add_or_remove_shortcut']['#weight'] = -100;
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for maintenance-page.html.twig.
+ */
+function emor_preprocess_maintenance_page(&$variables) {
+  // By default, site_name is set to Drupal if no db connection is available
+  // or during site installation. Setting site_name to an empty string makes
+  // the site and update pages look cleaner.
+  // @see template_preprocess_maintenance_page
+  if (!$variables['db_is_active']) {
+    $variables['site_name'] = '';
+  }
+
+  // Bartik has custom styling for the maintenance page.
+  $variables['#attached']['library'][] = 'bartik/maintenance_page';
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for node.html.twig.
+ */
+function emor_preprocess_node(&$variables) {
+  $theme = \Drupal::theme()->getActiveTheme()->getName();
+  $variables['theme_path'] = base_path().drupal_get_path('theme', $theme);
+  // Remove the "Add new comment" link on teasers or when the comment form is
+  // displayed on the page.
+  if ($variables['teaser'] || !empty($variables['content']['comments']['comment_form'])) {
+    unset($variables['content']['links']['comment']['#links']['comment-add']);
+  }
+
+  $node = $variables['node'];
+
+  //Prepare content for Article
+  $emor_type_list = array(
+    'emor_mapping_article',
+    'emor_mapping_audio',
+    'emor_mapping_video');
+  $type = $node->type->target_id;
+  if(in_array($type, $emor_type_list)){
+    //Get Index Categories Name
+    $value = $node->get('field_index_categories')->getValue();
+    if (!empty($value)){
+      $value = \Drupal\taxonomy\Entity\Term::load($value['0']['target_id']);
+      $value = $value->get('name')->value;
+      $variables['content']['index_categories_name'] = $value;
+    }
+  }
+
+  //Prepare content for Aboutpage
+  if($node->nid->value == 12){
+    $data = array();
+    $storage = \Drupal::entityManager()->getStorage('node');
+    $nids = $storage->getQuery()
+        ->condition('type', 'advisory_board_emor_team')
+        ->execute();
+    $list = $storage->loadMultiple($nids);
+    foreach ($list as $key => $value) {
+      //Detect FOUNDER
+      if ($value->get('field_is_founder')->value == 1){
+        $founder['name'] = $value->get('title')->value;
+        $founder['field_description'] = $value->get('field_description')->value;
+        if ($value->get('field_avatar_image')->getValue())
+          $founder['field_avatar_image'] = $value->field_avatar_image->entity->getFileUri();
+        else
+          $founder['field_avatar_image'] = 'no-profile';
+        $data['founder'][] = $founder;
+
+        // var_dump($value->field_avatar_image);
+        // exit();
+      }
+    }
+    var_dump($data);
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for block.html.twig.
+ */
+function emor_preprocess_block(&$variables) {
+  //SET SOME VARS
+  $emor_type_list = array(
+    8 => 'emor_mapping_article',
+    9 => 'emor_mapping_audio',
+    10 => 'emor_mapping_video',
+    );  
+  //Prepare for TOP NAVBAR
+  if ($variables['attributes']['id'] === 'block-topnavbar'){
+    //LOGO
+    $theme = \Drupal::theme()->getActiveTheme()->getName();
+    $variables['theme_path'] = base_path().drupal_get_path('theme', $theme);      
+    //SOCIAL ICON
+    $variables['socials_menu'] = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree('socials');
+    foreach ($variables['socials_menu'] as $key => $value) {
+      $temp = \Drupal\taxonomy\Entity\Term::load($value->tid);
+      $variables['socials_menu'][$key]->field_url_to_go = $temp->get('field_url_to_go')->value;
+    }
+    //TOP MENU
+    $variables['top_menu'] = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree('top_menu');
+    foreach ($variables['top_menu'] as $key => $value) {
+      $temp = \Drupal\taxonomy\Entity\Term::load($value->tid);
+      $variables['top_menu'][$key]->field_name_hebrew = $temp->get('field_name_hebrew')->value;
+      $variables['top_menu'][$key]->field_url_to_go = $temp->get('field_url_to_go')->value;
+      //Getchildrens
+      $children = \Drupal::entityManager()->getStorage('taxonomy_term')->loadChildren($value->tid);
+      $variables['top_menu'][$key]->hasChildren = (!empty($children)) ? true : false;      
+    }        
+  }
+
+  //Prepare Welcome text
+  if ($variables['attributes']['id'] === 'block-headerwelcometext'){
+    $variables['visible'] = TRUE;
+    //Get Frontpage
+    try {
+      $variables['is_front'] = \Drupal::service('path.matcher')->isFrontPage();
+    }
+    catch (Exception $e) {
+      $variables['is_front'] = FALSE;
+    }
+
+    if ( isset($GLOBALS['emor']['views']['id']) && $GLOBALS['emor']['views']['id'] == 'emor_mapping_explore'){
+      $tmp = \Drupal::service('entity.manager')->getStorage('view')->load('emor_mapping_explore');
+      $tmp = $tmp->getDisplay('default');
+      $variables['header_text'] = $tmp['display_options']['header']['area']['content']['value'];
+    }
+    $node = \Drupal::routeMatch()->getParameter('node');
+    
+    //Get header welcome text for node (Emor mapping article/audio/video)
+    if ($node) {
+      $type = $node->type->target_id;
+      if(in_array($type, $emor_type_list)){
+        $block = \Drupal::entityManager()->getStorage('block_content')->load(array_search($type, $emor_type_list));
+        $variables['header_text'] = $block->body->value;
+      } else{
+        $variables['visible'] = FALSE;
+      }
+    }
+  }
+
+  //Prepare for Headercover photo
+  if ($variables['attributes']['id'] === 'block-headercoverphoto'){
+    $variables['visible'] = TRUE;
+    //Get Frontpage
+    try {
+      $variables['is_front'] = \Drupal::service('path.matcher')->isFrontPage();
+    }
+    catch (Exception $e) {
+      $variables['is_front'] = FALSE;
+    }
+
+    $node = \Drupal::routeMatch()->getParameter('node');
+    
+    //Get header welcome text for node (Emor mapping article/audio/video)
+    if ($node) {
+      $type = $node->type->target_id;
+      if(!in_array($type, $emor_type_list)){
+        $variables['visible'] = FALSE;
+      }
+    }    
+  }
+
+  //Prepare for Index Tree
+  if ($variables['attributes']['id'] === 'block-indextree'){
+    $variables['index_tree'] = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree('index_categories');
+    $max_depth = 0;
+
+    foreach ($variables['index_tree'] as $key => $value) {
+      $temp = \Drupal\taxonomy\Entity\Term::load($value->tid);
+      $variables['index_tree'][$key]->color = $temp->get('field_category_color')->color;
+      //Getchildrens
+      $children = \Drupal::entityManager()->getStorage('taxonomy_term')->loadChildren($value->tid);
+      $variables['index_tree'][$key]->hasChildren = (!empty($children)) ? true : false;
+      //Get max depth
+      if ($value->depth > $max_depth)
+        $max_depth = $value->depth;
+    }
+    $variables['max_depth'] = $max_depth;  
+    // var_dump($variables['index_tree']);exit();  
+  }
+
+  //Prepare for Bubble chart
+  if ($variables['attributes']['id'] === 'block-bubblechart'){
+    $storage = \Drupal::entityManager()->getStorage('node');
+    $nids = $storage->getQuery()
+        ->condition('type', 'author')
+        ->condition('status', 1)
+        ->execute();
+    $variables['authors'] = $storage->loadMultiple($nids);
+    $arIds = $storage->getQuery()
+        ->condition('type', 'author','<>')
+        ->condition('status', 1)
+        ->execute();
+    $variables['articles'] = $storage->loadMultiple($arIds);
+  }
+
+  //Prepare for HOMPAGE VIDEO
+  if ($variables['attributes']['id'] === 'block-homepagevideo'){
+    $block = \Drupal::entityManager()->getStorage('block_content')->load(14);
+    $url = $block->field_youtube_url->value;
+    //extract the ID
+    preg_match(
+      '/[\\?\\&]v=([^\\?\\&]+)/',
+      $url,
+      $matches
+    );
+    $variables['youtube_video_code'] = $matches[1];
+    $variables['cover_image_url'] = file_create_url($block->field_cover_image->entity->getFileUri());
+  }
+
+  //Prepare for HOMPAGE MAPPING BANNER
+  if ($variables['attributes']['id'] === 'block-homepagemappingprojectbanner'){
+    $block = \Drupal::entityManager()->getStorage('block_content')->load(16);
+    $variables['field_url_to_go'] = $block->field_url_to_go->value;
+    $variables['banner_image_url'] = file_create_url($block->field_banner_image->entity->getFileUri());
+  } 
+  //Prepare for HOMPAGE GATEWAY BANNER
+  if ($variables['attributes']['id'] === 'block-homepagegatewaybanner'){
+    $block = \Drupal::entityManager()->getStorage('block_content')->load(17);
+    $variables['field_url_to_go'] = $block->field_url_to_go->value;
+    $variables['banner_image_url'] = file_create_url($block->field_banner_image->entity->getFileUri());
+  } 
+  //Prepare for HOMPAGE LIVEFEED
+  if ($variables['attributes']['id'] === 'block-homepagelivefeed'){
+    $block = \Drupal::entityManager()->getStorage('block_content')->load(18);
+    $variables['field_url_to_go'] = $block->field_url_to_go->value;
+    $variables['banner_image_url'] = file_create_url($block->field_banner_image->entity->getFileUri());
+  } 
+  //Prepare for HOMPAGE WELCOMING SHABBAT
+  if ($variables['attributes']['id'] === 'block-homepagewelcomingshabbat'){
+    $block = \Drupal::entityManager()->getStorage('block_content')->load(19);
+    $variables['field_url_to_go'] = $block->field_url_to_go->value;
+    $variables['banner_image_url'] = file_create_url($block->field_banner_image->entity->getFileUri());
+  } 
+
+  // Add a clearfix class to system branding blocks.
+  if ($variables['plugin_id'] == 'system_branding_block') {
+    $variables['attributes']['class'][] = 'clearfix';
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for menu.html.twig.
+ */
+function emor_preprocess_menu(&$variables, $hook) {
+  
+
+  $variables['attributes']['class'][] = 'clearfix';
+  
+  //Top-navbar menu
+  if ($hook == 'menu__top_navbar') {
+    // Get the current path.
+    $current_path = \Drupal::request()->getRequestUri();
+    $items = $variables['items'];
+    foreach ($items as $key => $item) {
+      // If path is current_path, set active to li.
+      if ($item['url']->toString() == $current_path) {
+        // Add active link.
+        $variables['items'][$key]['attributes']['class'] = 'active';
+      }
+    }
+  }
+
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for form templates.
+ */
+function emor_theme_suggestions_form_alter(array &$suggestions, array $variables) {
+  if ($variables['element']['#form_id'] == 'search_block_form') {
+    $suggestions[] = 'form__search_block_form';
+  }
+
+  if ($variables['element']['#form_id'] == 'views_exposed_form') {
+    if ( isset($GLOBALS['emor']['views']['id']) && $GLOBALS['emor']['views']['id'] == 'emor_mapping_explore'){
+      $suggestions[] = 'form__emor_mapping_explore_filter';
+    }
+  }  
+  
+}
+
+/**
+ * Implements hook_form_alter() to add classes to the search form.
+ */
+function emor_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  if (in_array($form_id, ['search_block_form', 'search_form'])) {
+    $key = ($form_id == 'search_block_form') ? 'actions' : 'basic';
+    if (!isset($form[$key]['submit']['#attributes'])) {
+      $form[$key]['submit']['#attributes'] = new Attribute();
+    }
+    $form[$key]['submit']['#attributes']->addClass('search-form__submit');
+  }
+}
+
+function emor_preprocess_form(&$variables) {
+  $element = $variables['element'];
+  $variables['sort_by'] = (isset($element['sort_by']))? $element['sort_by']['#options'] : '';
+  $variables['filter_by'] =(isset($element['#info']))? $element['#info']:'';
+  // echo '<pre>';
+  // var_dump($variables['filter_by']);
+  // echo '</pre>';
+
+  // if (isset($element['#action'])) {
+  //   $element['#attributes']['action'] = UrlHelper::stripDangerousProtocols($element['#action']);
+  // }
+  // Element::setAttributes($element, array('method', 'id'));
+  // if (empty($element['#attributes']['accept-charset'])) {
+  //   $element['#attributes']['accept-charset'] = "UTF-8";
+  // }
+  // $variables['attributes'] = $element['#attributes'];
+  // $variables['children'] = $element['#children'];
+}
+
+function emor_preprocess_region(&$variables) {
+  // Create the $content variable that templates expect.
+  $node = \Drupal::routeMatch()->getParameter('node');
+  //Get header welcome text for node (Emor mapping article/audio/video)
+  if ($node) {
+    $emor_type_list = array(
+      'emor_mapping_article',
+      'emor_mapping_audio',
+      'emor_mapping_video');
+    $type = $node->type->target_id;
+    if(in_array($type, $emor_type_list)){
+      $variables['emor_node'] = true;
+    }
+  }  
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function emor_theme_suggestions_node_alter(array &$suggestions, array $variables) {
+  if ($node = \Drupal::routeMatch()->getParameter('node')) {
+    $suggestions[] = 'node__'.preg_replace('/[^A-Za-z0-9\-]/', '_', strtolower($node->getTitle()));
+  }
+  return $suggestions;
+}

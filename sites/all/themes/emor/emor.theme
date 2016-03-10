@@ -90,6 +90,10 @@ function emor_preprocess_maintenance_page(&$variables) {
  * Implements hook_preprocess_HOOK() for node.html.twig.
  */
 function emor_preprocess_node(&$variables) {
+  $is_admin = \Drupal::service('router.admin_context')->isAdminRoute();
+  if ($is_admin)
+    break;
+  
   $theme = \Drupal::theme()->getActiveTheme()->getName();
   $variables['theme_path'] = base_path().drupal_get_path('theme', $theme);
   // Remove the "Add new comment" link on teasers or when the comment form is
@@ -98,9 +102,9 @@ function emor_preprocess_node(&$variables) {
     unset($variables['content']['links']['comment']['#links']['comment-add']);
   }
 
-  //Prepare content for Article
-  $variables['content']['index_categories_name'] = '';
   $node = $variables['node'];
+
+  //Prepare content for Article
   $emor_type_list = array(
     'emor_mapping_article',
     'emor_mapping_audio',
@@ -109,11 +113,104 @@ function emor_preprocess_node(&$variables) {
   if(in_array($type, $emor_type_list)){
     //Get Index Categories Name
     $value = $node->get('field_index_categories')->getValue();
+
+    //Get Author & Author Summary
+    $authorId = $variables['author']['id'] = $node->field_author->target_id;
+    $storage = \Drupal::entityManager()->getStorage('node');
+    $author = $storage->load($authorId);
+    $variables['author']['name'] = ($author) ? $author->getTitle() : '' ;
+    $variables['author']['summary'] = text_summary($author->get('body')->getValue()[0]['summary'], NULL, 255);
+    $variables['author']['profile_photo'] = file_create_url($author->field_profile_photo->entity->getFileUri());
+  
+    
     if (!empty($value)){
-      $value = \Drupal\taxonomy\Entity\Term::load($value['0']['target_id']);
+      $tid = $value['0']['target_id'];
+      $value = \Drupal\taxonomy\Entity\Term::load($tid);
       $value = $value->get('name')->value;
       $variables['content']['index_categories_name'] = $value;
+
+      //Get Mapped In
+      $var = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree('index_categories');
+      $mapped_in = array();
+      $tidParent = $tid;
+      while ( $tidParent != 0) {
+        foreach ($var as $key => $value) {
+          if($value->tid == $tidParent){
+            $tidParent = $value->parents[0];
+            if($tidParent != 0){
+              $nameParent = \Drupal\taxonomy\Entity\Term::load($tidParent);
+              $nameParent = $nameParent->get('name')->value;
+              $mapped_in[] = $nameParent;
+            }
+            break;
+          }
+        }
+      }
+      // $mapped_in[] = $variables['content']['index_categories_name'];
+      $variables['content']['mapped_in'] = $mapped_in;
+     
     }
+    if (isset($node->field_thumbnail->entity))
+      $variables['content']['thumbnail'] = file_create_url($node->field_thumbnail->entity->getFileUri());
+    else
+      $variables['content']['thumbnail'] = '';
+  }
+
+  //Prepare content for Aboutpage
+  if($node->nid->value == 12){
+    $data = array();
+    $storage = \Drupal::entityManager()->getStorage('node');
+    $nids = $storage->getQuery()
+        ->condition('type', 'advisory_board_emor_team')
+        ->execute();
+    $list = $storage->loadMultiple($nids);
+    foreach ($list as $key => $value) {
+      //Detect FOUNDER
+      if ($value->get('field_is_founder')->value == 1){
+        $founder['name'] = $value->get('title')->value;
+        $founder['field_description'] = $value->get('field_description')->value;
+        if ($value->get('field_avatar_image')->getValue())
+          $founder['field_avatar_image'] = file_create_url($value->field_avatar_image->entity->getFileUri());
+        else
+          $founder['field_avatar_image'] = $variables['theme_path'].'/images/no-profile.jpg';
+        $data['founder'][] = $founder;
+      } 
+      //Load the team
+      $team = $value->get('field_position')->getValue();
+      if (!empty($team)){
+        $tmp = \Drupal\taxonomy\Entity\Term::load($team['0']['target_id']);
+        $cate['name'] = $tmp->get('name')->value;
+        $cate['weight'] = $tmp->get('weight')->value;
+        $people['id'] = $value->id();
+        $people['order'] = $value->get('field_order')->value;
+        $people['name'] = $value->get('title')->value;
+        $people['field_description'] = $value->get('field_description')->value;
+        if ($value->get('field_avatar_image')->getValue())
+          $people['field_avatar_image'] = file_create_url($value->field_avatar_image->entity->getFileUri());
+        else
+          $people['field_avatar_image'] = $variables['theme_path'].'/images/no-profile.jpg';
+        $data['team'][$cate['name']][] = $people;
+        $data['team'][$cate['name']]['weight'] = $cate['weight'];        
+      }
+    }
+    //Sort by order
+    $sortCate = array();
+    foreach ($data['team'] as $key => $item) {
+      $sortCate[$key] = $item['weight'];
+      $sortable = array();
+      foreach ($item as $keychild => $row) {
+        if ($keychild != 'weight')
+          $sortable[$keychild] = $row['order'];
+      }
+      if(!empty($sortable))
+        array_multisort($sortable, SORT_ASC, $item);
+    }
+    if(!empty($sortCate))
+      array_multisort($sortCate, SORT_ASC, $data['team']);
+    foreach ($data['team'] as $key => $value) {
+      unset($data['team'][$key]['weight']);
+    }
+    $variables['data'] = $data;
   }
 }
 
@@ -121,6 +218,12 @@ function emor_preprocess_node(&$variables) {
  * Implements hook_preprocess_HOOK() for block.html.twig.
  */
 function emor_preprocess_block(&$variables) {
+  //SET SOME VARS
+  $emor_type_list = array(
+    8 => 'emor_mapping_article',
+    9 => 'emor_mapping_audio',
+    10 => 'emor_mapping_video',
+    );  
   //Prepare for TOP NAVBAR
   if ($variables['attributes']['id'] === 'block-topnavbar'){
     //LOGO
@@ -128,10 +231,33 @@ function emor_preprocess_block(&$variables) {
     $variables['theme_path'] = base_path().drupal_get_path('theme', $theme);      
     //SOCIAL ICON
     $variables['socials_menu'] = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree('socials');
+    foreach ($variables['socials_menu'] as $key => $value) {
+      $temp = \Drupal\taxonomy\Entity\Term::load($value->tid);
+      $variables['socials_menu'][$key]->field_url_to_go = $temp->get('field_url_to_go')->value;
+    }
+    //TOP MENU
+    $variables['top_menu'] = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree('top_menu');
+    foreach ($variables['top_menu'] as $key => $value) {
+      $temp = \Drupal\taxonomy\Entity\Term::load($value->tid);
+      $variables['top_menu'][$key]->field_name_hebrew = $temp->get('field_name_hebrew')->value;
+      $variables['top_menu'][$key]->field_url_to_go = $temp->get('field_url_to_go')->value;
+      //Getchildrens
+      $children = \Drupal::entityManager()->getStorage('taxonomy_term')->loadChildren($value->tid);
+      $variables['top_menu'][$key]->hasChildren = (!empty($children)) ? true : false;      
+    }        
   }
 
   //Prepare Welcome text
   if ($variables['attributes']['id'] === 'block-headerwelcometext'){
+    $variables['visible'] = TRUE;
+    //Get Frontpage
+    try {
+      $variables['is_front'] = \Drupal::service('path.matcher')->isFrontPage();
+    }
+    catch (Exception $e) {
+      $variables['is_front'] = FALSE;
+    }
+
     if ( isset($GLOBALS['emor']['views']['id']) && $GLOBALS['emor']['views']['id'] == 'emor_mapping_explore'){
       $tmp = \Drupal::service('entity.manager')->getStorage('view')->load('emor_mapping_explore');
       $tmp = $tmp->getDisplay('default');
@@ -141,16 +267,36 @@ function emor_preprocess_block(&$variables) {
     
     //Get header welcome text for node (Emor mapping article/audio/video)
     if ($node) {
-      $emor_type_list = array(
-        8 => 'emor_mapping_article',
-        9 => 'emor_mapping_audio',
-        10 => 'emor_mapping_video');
       $type = $node->type->target_id;
       if(in_array($type, $emor_type_list)){
         $block = \Drupal::entityManager()->getStorage('block_content')->load(array_search($type, $emor_type_list));
         $variables['header_text'] = $block->body->value;
+      } else{
+        $variables['visible'] = FALSE;
       }
     }
+  }
+
+  //Prepare for Headercover photo
+  if ($variables['attributes']['id'] === 'block-headercoverphoto'){
+    $variables['visible'] = TRUE;
+    //Get Frontpage
+    try {
+      $variables['is_front'] = \Drupal::service('path.matcher')->isFrontPage();
+    }
+    catch (Exception $e) {
+      $variables['is_front'] = FALSE;
+    }
+
+    $node = \Drupal::routeMatch()->getParameter('node');
+    
+    //Get header welcome text for node (Emor mapping article/audio/video)
+    if ($node) {
+      $type = $node->type->target_id;
+      if(!in_array($type, $emor_type_list)){
+        $variables['visible'] = FALSE;
+      }
+    }    
   }
 
   //Prepare for Index Tree
@@ -175,17 +321,110 @@ function emor_preprocess_block(&$variables) {
   //Prepare for Bubble chart
   if ($variables['attributes']['id'] === 'block-bubblechart'){
     $storage = \Drupal::entityManager()->getStorage('node');
-    $nids = $storage->getQuery()
-        ->condition('type', 'author')
-        ->condition('status', 1)
-        ->execute();
-    $variables['authors'] = $storage->loadMultiple($nids);
-    $arIds = $storage->getQuery()
-        ->condition('type', 'author','<>')
-        ->condition('status', 1)
-        ->execute();
-    $variables['articles'] = $storage->loadMultiple($arIds);
+
+    //get all questions
+      $qIds = $storage->getQuery()
+          ->condition('type', 'question')
+          ->condition('status', 1)
+          ->execute();
+
+      $variables['questions'] = $storage->loadMultiple($qIds);
+      $questions = $storage->loadMultiple($qIds);
+
+    //get default question
+      $dfqIds = $storage->getQuery()
+          ->condition('type', 'question')
+          ->condition('status', 1)
+          ->condition('field_default', 1)
+          ->sort('changed','DESC')
+          ->execute();
+      $it = 0; 
+      foreach ($dfqIds as $dfqId) {
+        if($it==0)
+          $questionId = $dfqId;
+        $it++;
+      }
+
+      //get all answers depend on question
+      $asIds = $storage->getQuery()
+          ->condition('type', 'answer')
+          ->condition('status', 1)
+          ->condition('field_question', $questionId)
+          ->execute();
+      $answers = $storage->loadMultiple($asIds);
+      $variables['answers'] = $answers;
+
+      // get all authors depend on answers
+      $auIds = array();
+      foreach ($answers as $answer) {
+        $tmp = $answer->get('field_author_bubble');
+        foreach ($tmp as $item) {
+          $auIds[] = (int)$item->target_id;
+        }
+      }
+      $authors = $storage->loadMultiple($auIds);
+      $cities = array();
+      $names = array();
+      $years = array();
+      $positions = array();
+      foreach ($authors as $author) {
+        if($author->field_city->value!='' && !in_array($author->field_city->value, $cities))
+          $cities[] = $author->field_city->value;
+        if($author->title->value!='' && !in_array($author->title->value, $names))
+          $names[] = $author->title->value;
+        if($author->field_author_position->value!='' && !in_array($author->field_author_position->value, $positions))
+          $positions[] = $author->field_author_position->value;
+        $dob = substr($author->field_dob->value,0,4);
+        if($dob!='' && !in_array($dob, $years))
+          $years[] = $dob;
+      }
+      $variables['authors'] = $authors;
+      $variables['curr_ques_id'] = $questionId;
+      $variables['cities'] =  $cities;
+      $variables['names'] =  $names;
+      $variables['years'] =  $years;
+      $variables['position'] =  $positions;
   }
+
+
+  //Prepare for HOMPAGE VIDEO
+  if ($variables['attributes']['id'] === 'block-homepagevideo'){
+    $block = \Drupal::entityManager()->getStorage('block_content')->load(14);
+    $url = $block->field_youtube_url->value;
+    //extract the ID
+    preg_match(
+      '/[\\?\\&]v=([^\\?\\&]+)/',
+      $url,
+      $matches
+    );
+    $variables['youtube_video_code'] = $matches[1];
+    $variables['cover_image_url'] = file_create_url($block->field_cover_image->entity->getFileUri());
+  }
+
+  //Prepare for HOMPAGE MAPPING BANNER
+  if ($variables['attributes']['id'] === 'block-homepagemappingprojectbanner'){
+    $block = \Drupal::entityManager()->getStorage('block_content')->load(16);
+    $variables['field_url_to_go'] = $block->field_url_to_go->value;
+    $variables['banner_image_url'] = file_create_url($block->field_banner_image->entity->getFileUri());
+  } 
+  //Prepare for HOMPAGE GATEWAY BANNER
+  if ($variables['attributes']['id'] === 'block-homepagegatewaybanner'){
+    $block = \Drupal::entityManager()->getStorage('block_content')->load(17);
+    $variables['field_url_to_go'] = $block->field_url_to_go->value;
+    $variables['banner_image_url'] = file_create_url($block->field_banner_image->entity->getFileUri());
+  } 
+  //Prepare for HOMPAGE LIVEFEED
+  if ($variables['attributes']['id'] === 'block-homepagelivefeed'){
+    $block = \Drupal::entityManager()->getStorage('block_content')->load(18);
+    $variables['field_url_to_go'] = $block->field_url_to_go->value;
+    $variables['banner_image_url'] = file_create_url($block->field_banner_image->entity->getFileUri());
+  } 
+  //Prepare for HOMPAGE WELCOMING SHABBAT
+  if ($variables['attributes']['id'] === 'block-homepagewelcomingshabbat'){
+    $block = \Drupal::entityManager()->getStorage('block_content')->load(19);
+    $variables['field_url_to_go'] = $block->field_url_to_go->value;
+    $variables['banner_image_url'] = file_create_url($block->field_banner_image->entity->getFileUri());
+  } 
 
   // Add a clearfix class to system branding blocks.
   if ($variables['plugin_id'] == 'system_branding_block') {
@@ -244,25 +483,284 @@ function emor_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_stat
     }
     $form[$key]['submit']['#attributes']->addClass('search-form__submit');
   }
+
+  if($form['#id'] == 'views-exposed-form-emor-mapping-explore-page'){
+    // fields which you want to rename
+    $customNames = array(
+      'title_1' => 'author',
+      'created_1' => 'most-recent',
+      'type_1' => 'article',
+      'type_2' => 'video',
+      'type' => 'audio',
+    );
+
+    // rename option values
+    foreach ($customNames as $name => $new_name) {
+      $nameItem = $form['sort_by']['#options'][$name];
+      // $form['sort_by']['#options'][$new_name] = $form['sort_by']['#options'][$name];
+      // $form['sort_by']['#options'][$name] = FALSE;
+      // unset($form['sort_by']['#options'][$name]);  
+
+      //Replace name
+      $keys = array_keys( $form['sort_by']['#options'] );
+      $keys[ array_search( $name, $keys ) ] = $new_name;
+
+      $form['sort_by']['#options'] = array_combine( $keys, $form['sort_by']['#options'] );
+      //Re-add old name for core function work
+      $form['sort_by']['#options'][$name] = $nameItem;
+      $form['sort_by']['#options'][$name] = FALSE;
+
+      if ($form_state->getUserInput()['sort_by'] == $new_name){
+        $input = $form_state->getUserInput();
+        $input['sort_by'] = $name;
+        $form_state->setUserInput($input);
+      }
+
+    }
+
+    //Combine search
+    $input = $form_state->getUserInput();
+    if(!empty($input['search'])){
+      $input['title_combine'] = $input['search'];
+      $input['author_combine'] = $input['search'];
+      $input['search'] = '';
+      $form_state->setUserInput($input);
+    }
+
+    //Custom year filter        
+    if(!empty($input['year'])){
+      $year = $input['year'];
+      $input['year'] = array();
+      $input['year']['min'] = $year.'-01-01';
+      $input['year']['max'] = $year.'-12-31';
+      $form_state->setUserInput($input);
+    }
+
+    //Custom length (total pages)
+    if(!empty($input['length'])){
+      $length = $input['length'];
+      switch($length) 
+      { 
+          case '1':{
+            $input['length_op'] = 'between';
+            $input['length_val']['min'] = 1;
+            $input['length_val']['max'] = 3;
+            break;
+          }
+          case '2':{
+            $input['length_op'] = 'between';
+            $input['length_val']['min'] = 4;
+            $input['length_val']['max'] = 6;
+            break;
+          }
+          case '3':{
+            $input['length_op'] = '>=';
+            $input['length_val']['value'] = 7;
+            break;
+          }                        
+          default:{
+            //code
+          }
+      }
+      $form_state->setUserInput($input);
+    }
+  
+  } 
+
 }
 
 function emor_preprocess_form(&$variables) {
   $element = $variables['element'];
   $variables['sort_by'] = (isset($element['sort_by']))? $element['sort_by']['#options'] : '';
   $variables['filter_by'] =(isset($element['#info']))? $element['#info']:'';
-  // echo '<pre>';
-  // var_dump($variables['filter_by']);
-  // echo '</pre>';
 
-  // if (isset($element['#action'])) {
-  //   $element['#attributes']['action'] = UrlHelper::stripDangerousProtocols($element['#action']);
-  // }
-  // Element::setAttributes($element, array('method', 'id'));
-  // if (empty($element['#attributes']['accept-charset'])) {
-  //   $element['#attributes']['accept-charset'] = "UTF-8";
-  // }
-  // $variables['attributes'] = $element['#attributes'];
-  // $variables['children'] = $element['#children'];
+  if ($element['#id'] == 'views-exposed-form-emor-mapping-explore-page'){
+    //Sort By
+    parse_str(\Drupal::request()->getQueryString(), $queryArr);
+    if (isset($queryArr['length']))
+      $queryArr['length_val'] = $queryArr['length'];
+    $variables['queryArr'] = $queryArr;
+    //Custom mediatype sort
+    $variables['sort_by']['Media type'] = array(
+      'article' => $variables['sort_by']['article'],
+      'video' => $variables['sort_by']['video'],
+      'audio' => $variables['sort_by']['audio'],
+    );
+    $variables['sort_by']['article'] = $variables['sort_by']['video'] = $variables['sort_by']['audio'] = FALSE;
+
+    $customSortByArr = array(
+      '' => 'author', //Default value
+      'title_1' => 'author',
+      'created_1' => 'most-recent',
+      'type_1' => 'article',
+      'type_2' => 'video',
+      'type' => 'audio',
+    );
+    $variables['customSortBy'] = $customSortByArr;
+    //Filter By
+    $customFilterArr = array(
+      'type' => NULL,
+      'author' => NULL,
+      'year' => NULL,
+      'keywords' => NULL,
+      'length_val' => NULL
+    );
+    $customFilter = array();
+    foreach ($customFilterArr as $key => $value) {
+      //Custom author
+      if($key == 'author'){
+        //Get Author
+        $storage = \Drupal::entityManager()->getStorage('node');
+        $authorIds = $storage->getQuery()
+            ->condition('type', 'author')
+            ->condition('status', 1)
+            ->execute();
+        $authorArr = $storage->loadMultiple($authorIds);
+        $customFilter[$key] = array();
+        foreach ($authorArr as $key => $author) { 
+          $customFilter['author'][] = $author->get('title')->value;
+        }
+      }elseif ($key == 'year') {
+        //Get Year field_published_date
+        $storage = \Drupal::entityManager()->getStorage('node');
+        $query = \Drupal::entityQuery('node');
+        $group = $query->orConditionGroup()
+          ->condition('type', 'emor_mapping_article')
+          ->condition('type', 'emor_mapping_audio')
+          ->condition('type', 'emor_mapping_video');
+        $query->condition($group)->condition('status', 1);
+        $nodeIds = $query->execute();
+        $yearArr = $storage->loadMultiple($nodeIds);
+
+        $customFilter[$key] = array();
+        foreach ($yearArr as $publish_date) { 
+          $year = intval($publish_date->get('field_published_date')->value);
+          if(!isset($customFilter[$key][$year]))
+            $customFilter[$key][$year] = $year;
+        }
+        sort($customFilter[$key]);
+      }else{
+        $customFilter[$key] = $element[$key];
+      }
+    }
+    $variables['customFilter'] = $customFilter;
+  }
+}
+
+function emor_preprocess_views_view_grid(&$variables) {
+  // if(isset($_GET['dev'])){
+    parse_str(\Drupal::request()->getQueryString(), $queryArr);
+    if (isset($queryArr['sort_by'])){
+      $sort_type_list = array(
+        'article',
+        'audio',
+        'video'
+      );      
+      if (in_array($queryArr['sort_by'], $sort_type_list)){
+
+          foreach ($variables['rows'] as $result_index => $item) {
+            $type = $item['#node']->getType();
+            //Swap
+            if($type != 'emor_mapping_'.$queryArr['sort_by']){
+              $variables['rows'][] = $item;
+              unset($variables['rows'][$result_index]);
+            }
+          }                            
+      }
+      //Re-preprocess
+      $options = $variables['options'] = $variables['view']->style_plugin->options;
+      $horizontal = ($options['alignment'] === 'horizontal');
+
+      $col = 0;
+      $row = 0;
+      $items = array();
+      $remainders = count($variables['rows']) % $options['columns'];
+      $num_rows = floor(count($variables['rows']) / $options['columns']);
+
+      // Iterate over each rendered views result row.
+      foreach ($variables['rows'] as $result_index => $item) {
+
+        // Add the item.
+        if ($horizontal) {
+          $items[$row]['content'][$col]['content'] = $item;
+        }
+        else {
+          $items[$col]['content'][$row]['content'] = $item;
+        }
+
+        // Create attributes for rows.
+        if (!$horizontal || ($horizontal && empty($items[$row]['attributes']))) {
+          $row_attributes = array('class' => array());
+          // Add custom row classes.
+          $row_class = array_filter(explode(' ', $variables['view']->style_plugin->getCustomClass($result_index, 'row')));
+          if (!empty($row_class)) {
+            $row_attributes['class'] = array_merge($row_attributes['class'], $row_class);
+          }
+          // Add row attributes to the item.
+          if ($horizontal) {
+            $items[$row]['attributes'] = new Attribute($row_attributes);
+          }
+          else {
+            $items[$col]['content'][$row]['attributes'] = new Attribute($row_attributes);
+          }
+        }
+
+        // Create attributes for columns.
+        if ($horizontal || (!$horizontal && empty($items[$col]['attributes']))) {
+          $col_attributes = array('class' => array());
+          // Add default views column classes.
+          // Add custom column classes.
+          $col_class = array_filter(explode(' ', $variables['view']->style_plugin->getCustomClass($result_index, 'col')));
+          if (!empty($col_class)) {
+            $col_attributes['class'] = array_merge($col_attributes['class'], $col_class);
+          }
+          // Add automatic width for columns.
+          if ($options['automatic_width']) {
+            $col_attributes['style'] = 'width: ' . (100 / $options['columns']) . '%;';
+          }
+          // Add column attributes to the item.
+          if ($horizontal) {
+            $items[$row]['content'][$col]['attributes'] = new Attribute($col_attributes);
+          }
+          else {
+            $items[$col]['attributes'] = new Attribute($col_attributes);
+          }
+        }
+
+        // Increase, decrease or reset appropriate integers.
+        if ($horizontal) {
+          if ($col == 0 && $col != ($options['columns'] - 1)) {
+            $col++;
+          }
+          elseif ($col >= ($options['columns'] - 1)) {
+            $col = 0;
+            $row++;
+          }
+          else {
+            $col++;
+          }
+        }
+        else {
+          $row++;
+          if (!$remainders && $row == $num_rows) {
+            $row = 0;
+            $col++;
+          }
+          elseif ($remainders && $row == $num_rows + 1) {
+            $row = 0;
+            $col++;
+            $remainders--;
+          }
+        }
+      }
+
+      // Add items to the variables array.
+      $variables['items'] = $items;      
+    }
+
+
+
+  // }      
 }
 
 function emor_preprocess_region(&$variables) {
@@ -279,4 +777,14 @@ function emor_preprocess_region(&$variables) {
       $variables['emor_node'] = true;
     }
   }  
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function emor_theme_suggestions_node_alter(array &$suggestions, array $variables) {
+  if ($node = \Drupal::routeMatch()->getParameter('node')) {
+    $suggestions[] = 'node__'.preg_replace('/[^A-Za-z0-9\-]/', '_', strtolower($node->getTitle()));
+  }
+  return $suggestions;
 }

@@ -45,11 +45,11 @@
 			{{ title_suffix }}
 			{% block content %}
 			    <h2 class="text-center">Index<i class="fa fa-info info-tooltip"></i></h2>
-				  <ul class="nav nav-pills nav-stacked">
+				  <ul class="nav nav-pills nav-stacked indextree">
 					<h2 class="col-lg-8 hover-title">Lorem ipsum title</h2>
 				    {% for key,item in cate_array if item.depth == depth %}
 					        <li class="dropdown">
-					        	<a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="cate-color fa fa-stop" style="color: {{ item.color }}"></span>{{ item.name }} <span class="fa fa-angle-right"></span></a>
+					        	<a class="dropdown-toggle" data-toggle="" data-category-id="{{item.tid}}" ><span class="cate-color fa fa-stop" style="color: {{ item.color }}"></span>{{ item.name }}<span class="fa fa-angle-right"></span></a>
 						      	<ul class="dropdown-menu">
 						      		{{ index.print(cate_array, attributes, depth + 1, item.tid) }}
 					     	 	</ul>	        	
@@ -63,13 +63,13 @@
 		{% for key,item in cate_array if item.parents.0 == parent %}
 			{% if item.hasChildren %}
 	        	<li class="dropdown-submenu">
-        			<a class="dropdown-toggle" data-toggle="dropdown" href="#">{{ item.name }}</a>
+        			<a class="dropdown-toggle" data-toggle="" data-category-id="{{item.tid}}">{{ item.name }}</a>
 			      	<ul class="dropdown-menu">
 						{{ index.print(cate_array, attributes, depth + 1, item.tid) }}
 		     	 	</ul>			        		
 	        	</li>				
 			{% else %}
-				<li><a href="emor-mapping-explore">{{ item.name }}</a></li>
+				<li><a data-category-id="{{item.tid}}" class="target" data-category-id="{{item.tid}}" >{{ item.name }}</a></li>
 			{% endif %}
 			
 		{% endfor %}
@@ -77,3 +77,9 @@
 
 
 {% endmacro %}
+<script>
+	jQuery('.indextree a.target').on('click',function(e){
+		var query = 'category='+jQuery(this).data('category-id');
+		ajaxRequest(query, '/emor-mapping-explore');
+	});
+</script>

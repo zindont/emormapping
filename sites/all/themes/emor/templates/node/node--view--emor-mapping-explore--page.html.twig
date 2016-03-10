@@ -75,11 +75,15 @@
 <div{{ attributes.addClass(classes) }}>
   <div class="article-img">
     <a href="{{ url }}" rel="bookmark">
-      <img src="{{ theme_path }}/images/placeholder.jpg" alt="">
+      {% if content.thumbnail == '' %}
+        <img src="{{ theme_path }}/images/imgpsh_fullsize_1.jpg" alt="">
+      {% else %}
+        <img src="{{ content.thumbnail }}" alt="">
+      {% endif %}
     </a>
   </div>
   <div class="desc-box">
-    <h2 class="title"><a href="{{ url }}" rel="bookmark">{{ label }}</a></h2>
-    <p class="desc-text text-center">{{ content.field_short_description }}</p>
+    <h2 class="title"><a href="{{ url }}" rel="bookmark" title="{{ node.label }}">{{ label }}</a></h2>
+    <div class="desc-text text-center">{{ content.field_short_description }}</div>
   </div>
 </div>

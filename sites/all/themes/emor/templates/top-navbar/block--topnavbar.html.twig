@@ -43,6 +43,22 @@
   {% endif %}
   {{ title_suffix }}
   {% block content %}
+  <nav class="navbar navbar-default socials-menu">
+    <div class="container">
+        <ul class="nav navbar-nav address pull-right text-uppercase">
+          <li><a><i class="fa fa-map-marker" ></i>IL <span class="caret"></span></a></li>
+          <li><a>10.18.2015/5 Heshvan 5776/Lech Lecha</a></li>
+          <li><a class="text-rtl" dir="rtl">בס"ד</a></li>
+        </ul>     
+        <ul class="nav navbar-nav pull-right">
+          {% for item in socials_menu %}
+            <li class="item"><a class="fa fa-{{ item.name|lower }}" target="_blank" href="{{ item.field_url_to_go }}">{#{ item.name|lower }#}</a></li>
+          {% endfor %}
+        </ul>       
+    </div>
+  </nav>  
+
+  {% import _self as topmenu %}
   <nav class="navbar navbar-default navbar-static-top">
       <div class="container">
           <div class="navbar-header">
@@ -51,24 +67,65 @@
               "collapse" type="button"><span class="sr-only">Toggle
               navigation</span> <span class="icon-bar"></span> <span class=
               "icon-bar"></span> <span class="icon-bar"></span></button>
-              <a class="navbar-brand" href="#"><img src="{{ theme_path }}/logo.png" alt=""></a>
+              <a class="navbar-brand" href="/"><img src="{{ theme_path }}/logo.png" alt=""></a>
           </div>
           <div class="navbar-collapse collapse" id="navbar">
-            {{ content }}
-            <ul class="nav navbar-nav socials_menu">
-              {% for item in socials_menu %}
-                <li><a class="fa fa-{{ item.name|lower }}" href="{{ item.description__value }}">{#{ item.name|lower }#}</a></li>
-              {% endfor %}
-            </ul>
-            <ul class="nav navbar-nav address">
-              <li><a><i class="fa fa-map-marker" ></i>IL <span class="caret"></span></a></li>
-              <li><a>10.18.2015/5 Heshvan 5776/Lech Lecha</a></li>
-              <li><a class="text-rtl" dir="rtl">בס"ד</a></li>
-            </ul>
+            {#{ content }#}
+            {#{ dump(top_menu) }#}
 
             
-          </div><!--/.nav-collapse -->
+            <ul class="nav navbar-nav" id="top-menu-0">
+              {{ topmenu.print_topmenu(top_menu, 0, 0) }}
+
+              {% macro print_topmenu(array, depth, parent) %}
+                {% import _self as topmenu %}
+                {% for item in array if item.depth == depth %}
+                  {% if item.hasChildren and item.parents.0 == parent%}
+                    <li class="panel {{ (parent == 0) ? 'root' : '' }}">
+                      {% if parent == 0 %}
+                        <a data-toggle="collapse" data-parent="#top-menu-{{ parent }}" href="#{{ item.tid }}">{{ item.name }} &nbsp; | &nbsp; {{ item.field_name_hebrew }}</a>   
+                      {% else %}
+                        <a data-toggle="collapse" data-parent="#top-menu-{{ parent }}" href="#{{ item.tid }}">
+                          {{ item.name }}
+                          <hr>
+                          {{ item.field_name_hebrew }}
+                        </a>                    
+                      {% endif %} 
+                      <ul id="{{ item.tid }}" class="child-menu {{ (depth % 2 != 0) ? 'odd' }} panel-collapse collapse">
+                        {{ topmenu.print_topmenu(array, depth + 1, item.tid) }}
+                      </ul>
+                    </li>
+                  {% elseif item.parents.0 == parent %}                 
+                    <li class="panel {{ (parent == 0) ? 'root' : '' }}">
+                      {% if parent == 0 %}
+                        <a href="{{ item.field_url_to_go }}">{{ item.name }} &nbsp; | &nbsp; {{ item.field_name_hebrew }}</a>  
+                      {% else %}
+                        <a href="{{ item.field_url_to_go }}">
+                        {{ item.name }}
+                        <hr>
+                        {{ item.field_name_hebrew }}
+                        </a>                    
+                      {% endif %}                        
+                    </li>                                    
+                  {% endif %}                  
+                {% endfor %}
+              {% endmacro %}
+              <li class="panel root search">
+                  <a aria-expanded="false" class="collapsed" data-parent="#top-menu-0"
+                  data-toggle="collapse" href="#search"><i class="fa fa-search"></i></a>
+                  <ul aria-expanded="false" class="child-menu panel-collapse collapse" id="search">
+                    <div class="container">
+                      <form class="input-group form-search pull-right" action="#">
+                        <input type="text" name="search" class="form-control search-query" placeholder="Search Emor Project...">
+                        <span class="input-group-btn">
+                          <button type="submit" class="btn btn-primary">SEARCH</button>
+                        </span>
+                      </form>                        
+                    </div>
+                  </ul>        
+              </li>              
+            </ul>
+          </div>
       </div>
   </nav>
   {% endblock %}
-

@@ -90,3 +90,4 @@ $settings['extension_discovery_scan_tests'] = TRUE;
  * using these parameters in a request to rebuild.php.
  */
 $settings['rebuild_access'] = TRUE;
+$settings['twig_debug'] = TRUE;

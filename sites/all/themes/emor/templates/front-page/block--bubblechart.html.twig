@@ -27,6 +27,648 @@
  * @ingroup themeable
  */
 #}
+<script type="text/javascript">
+    jQuery(document).ready(function($) {
+        current_type = 'author';
+        current_q = {{ curr_ques_id }};
+        current_loc = current_name = current_year = current_media_type = current_author_name = current_language = current_page_length = current_is_mapping = '';
+        $('#showAuthorPopup').fancybox();
+        $('#showArticlePopup').fancybox();
+        $('#bubbleChartContainer').highcharts({
+
+            chart: {
+                type: 'bubble',
+                // plotBorderWidth: 1,
+                // zoomType: 'xy'
+            },
+
+            title: {
+                text: ''
+            },
+
+            xAxis: {
+                title: {
+                  text: ""
+                },
+                categories: ['',{% for answer in answers %}'{{ answer.title.value|e }}',{% endfor %}],
+                 gridLineWidth: 1,
+                tickInterval:1, 
+            },
+
+            yAxis: {
+                startOnTick: false,
+                endOnTick: false,
+                title: {
+                  text: "Years"
+                },
+                tickInterval:1
+            },
+            legend: {
+                enable: false
+            },
+
+            series: [{
+                name: 'Author',
+                data: [
+                    {% for author in authors %}
+                        {% set tmp = loop.index %}
+                        {% for answer in answers %}
+                            {% set tmp1 = loop.index %}
+                            {% for au in answer.field_author_bubble %}
+                                {% if author.nid.value == au.target_id %}
+                                    {% set tmp = tmp1 %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                        {
+                            x: {{ tmp }},
+                            y: {{ author.field_dob.value|date("Y") }},
+                            z: {% if author.field_size_bubble is empty %}63{% else %}{{ author.field_size_bubble.value|number_format }}{% endif %},
+                            name: "{{ author.title.value|e }}",
+                            color: "{% if author.field_color_bubble is empty %}#FFFFFF{% else %}{{ author.color_bubble.value|number_format }}{% endif %}",
+                            events: {
+                                click: function (event) {
+                                    $.ajax({
+                                        url: "http://emor.zdhdemo.com/node/{{ author.nid.value|e }}?_format=json",
+                                        method: "GET",
+                                        headers: {
+                                            "Content-Type": "application/json"
+                                        },
+                                        success: function(data, status, xhr) {
+                                            //alert(data.title[0].value);
+                                            
+                                            $('.author.infos .name span').text(data.title[0].value);
+                                            $('.author.infos .location span').text(data.field_city[0].value + ' ' + data.field_country[0].value);
+                                            $('.author.infos .dob span').text(data.field_dob[0].value);
+                                            if(data.field_dod!='')
+                                                $('.author.infos .dod span').text(data.field_dod[0].value);
+                                            else
+                                                $('.author.infos .dod span').text('');
+
+                                            if(data.field_author_position!='')
+                                                $('.author.infos .position span').text(data.field_author_position[0].value);
+                                            else
+                                                $('.author.infos .position span').text('');
+
+                                            if(data.field_language!='')
+                                                $('.author.infos .language span').text(data.field_language[0].value);
+                                            else
+                                                $('.author.infos .language span').text('English');
+
+                                            if(data.field_profile_photo!=''){
+                                                $('.author.infos .authorAvatar').attr({
+                                                    src: data.field_profile_photo[0].url,
+                                                    alt: data.field_profile_photo[0].alt,
+                                                });
+                                            }else{
+                                                $('.author.infos .authorAvatar').attr({
+                                                    src: '',
+                                                    alt: '',
+                                                });
+                                            }
+
+                                            if(data.field_works!=''){
+                                                var $el = $(".works .listWorks");
+                                                $el.empty();
+                                                $.each(data.field_link, function(key,value) {
+                                                    $el.append(jQuery('<li></li>').append(jQuery('<a></a>').attr('href',value.uri).attr('target','_blank').text(value.title)));
+                                                });
+                                            }else{
+                                                $(".works .listWorks").empty();
+                                            }
+
+                                            $('#showAuthorPopup').click();
+                                            $('#bubbleDetail').show();
+                                            $('#bubbleDetail .infos.article').slideUp('slow',function(){
+                                                $('#bubbleDetail .infos.author').slideDown('slow');
+                                            });
+                                        }
+                                    })
+                                    //alert(this.name + ' clicked');
+                                }
+                            }
+                        },
+                    {% endfor %}
+                ],
+                marker: {
+                    fillColor: {
+                        radialGradient: { cx: 0.4, cy: 0.3, r: 0.7 },
+                        stops: [
+                            [0, 'rgba(255,255,255,0.5)'],
+                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0.5).get('rgba')]
+                        ]
+                    }
+                },
+                cursor: 'pointer',
+                // events: {
+                //     click: function (event) {
+                //         alert(this.name + ' clicked');
+                //     }
+                // }
+            }]
+
+        });
+        var chart = $('#bubbleChartContainer').highcharts();
+        function reloadChartData (chart, data) {
+            var dtArr = (new Function("return " + data+ ";")());
+            chart.series[0].setData(dtArr.dataSeries);
+            chart.xAxis[0].setCategories(dtArr.cats);
+            if(current_type!='author'){
+                if(current_type=='text'){
+                    chart.series[0].name = 'Article Text';
+                    chart.legend.allItems[0].update({name:'Article Text'});
+                }else if(current_type=='video'){
+                    chart.series[0].name = 'Article Video';
+                    chart.legend.allItems[0].update({name:'Article Video'});
+                }else{
+                    chart.series[0].name = 'Article Audio';
+                    chart.legend.allItems[0].update({name:'Article Audio'});
+                }
+
+                /* update Author name for filter*/
+                if(!jQuery.isEmptyObject(dtArr.authors)){
+                    var $el = $(".articleFilter .authorName ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'author',
+                        'value': ''
+                    }).text('All')));
+                    $.each(dtArr.authors, function(key,value) {
+                        $el.append($("<li></li>").addClass('filterArticle').append($('<a></a>').attr({
+                            'href':'#',
+                            'type': 'author',
+                            'value': key
+                        }).text(value)));
+                    });
+                }else{
+                    var $el = $(".articleFilter .authorName ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'author',
+                        'value': ''
+                    }).text('All')));
+                }
+
+                /* update Article title for filter*/
+                if(dtArr.titles.length > 0){
+                    var $el = $(".articleFilter .articleName ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'name',
+                        'value': ''
+                    }).text('All')));
+                    $.each(dtArr.titles, function(key,value) {
+                        $el.append($("<li></li>").addClass('filterArticle').append($('<a></a>').attr({
+                            'href':'#',
+                            'type': 'name',
+                            'value': value
+                        }).text(value)));
+                    });
+                }else{
+                    var $el = $(".articleFilter .articleName ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'name',
+                        'value': ''
+                    }).text('All')));
+                }
+
+                /* update locations for filter*/
+                if(dtArr.locations.length > 0){
+                    var $el = $(".articleFilter .location ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'loc',
+                        'value': ''
+                    }).text('All')));
+                    $.each(dtArr.locations, function(key,value) {
+                        $el.append($("<li></li>").addClass('filterArticle').append($('<a></a>').attr({
+                            'href':'#',
+                            'type': 'loc',
+                            'value': value
+                        }).text(value)));
+                    });
+                }else{
+                    var $el = $(".articleFilter .location ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'loc',
+                        'value': ''
+                    }).text('All')));
+                }
+
+                /* update year for filter*/
+                if(dtArr.years.length > 0){
+                    var $el = $(".articleFilter .publicYear ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'year',
+                        'value': ''
+                    }).text('All')));
+                    $.each(dtArr.years, function(key,value) {
+                        $el.append($("<li></li>").addClass('filterArticle').append($('<a></a>').attr({
+                            'href':'#',
+                            'type': 'year',
+                            'value': value
+                        }).text(value)));
+                    });
+                }else{
+                    var $el = $(".articleFilter .publicYear ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'year',
+                        'value': ''
+                    }).text('All')));
+                }
+
+                /* update position for filter*/
+                if(dtArr.positions.length > 0){
+                    var $el = $(".articleFilter .position ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'position',
+                        'value': ''
+                    }).text('All')));
+                    $.each(dtArr.positions, function(key,value) {
+                        $el.append($("<li></li>").addClass('filterArticle').append($('<a></a>').attr({
+                            'href':'#',
+                            'type': 'position',
+                            'value': value
+                        }).text(value)));
+                    });
+                }else{
+                    var $el = $(".articleFilter .position ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'position',
+                        'value': ''
+                    }).text('All')));
+                }
+
+                /* update media types for filter*/
+                if(dtArr.mediaTypes.length > 0){
+                    var $el = $(".articleFilter .mediaType ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'media_type',
+                        'value': ''
+                    }).text('All')));
+                    $.each(dtArr.mediaTypes, function(key,value) {
+                        $el.append($("<li></li>").addClass('filterArticle').append($('<a></a>').attr({
+                            'href':'#',
+                            'type': 'media_type',
+                            'value': value
+                        }).text(value)));
+                    });
+                }else{
+                    var $el = $(".articleFilter .mediaType ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'media_type',
+                        'value': ''
+                    }).text('All')));
+                }
+
+                /* update page lengths for filter*/
+                if(dtArr.pageLengths.length > 0){
+                    var $el = $(".articleFilter .pagelengths ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'page_length',
+                        'value': ''
+                    }).text('All')));
+                    $.each(dtArr.pageLengths, function(key,value) {
+                        $el.append($("<li></li>").addClass('filterArticle').append($('<a></a>').attr({
+                            'href':'#',
+                            'type': 'page_length',
+                            'value': value
+                        }).text(value)));
+                    });
+                }else{
+                    var $el = $(".articleFilter .pagelengths ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'page_length',
+                        'value': ''
+                    }).text('All')));
+                }
+            }else{
+                chart.series[0].name = 'Author';
+                chart.legend.allItems[0].update({name:'Author'});
+
+                /* update name for filter*/
+                if(dtArr.names.length > 0){
+                    var $el = $(".authorFilter .authorName ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterAuthor current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'name',
+                        'value': ''
+                    }).text('All')));
+                    $.each(dtArr.names, function(key,value) {
+                        $el.append($("<li></li>").addClass('filterAuthor').append($('<a></a>').attr({
+                            'href':'#',
+                            'type': 'name',
+                            'value': value
+                        }).text(value)));
+                    });
+                }else{
+                    var $el = $(".articleFilter .authorName ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'name',
+                        'value': ''
+                    }).text('All')));
+                }
+
+                /* update locations for filter*/
+                if(dtArr.cities.length > 0){
+                    var $el = $(".authorFilter .location ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterAuthor current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'loc',
+                        'value': ''
+                    }).text('All')));
+                    $.each(dtArr.cities, function(key,value) {
+                        $el.append($("<li></li>").addClass('filterAuthor').append($('<a></a>').attr({
+                            'href':'#',
+                            'type': 'loc',
+                            'value': value
+                        }).text(value)));
+                    });
+                }else{
+                    var $el = $(".articleFilter .location ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'loc',
+                        'value': ''
+                    }).text('All')));
+                }
+
+                /* update year for filter*/
+                if(dtArr.years.length > 0){
+                    var $el = $(".authorFilter .year ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterAuthor current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'year',
+                        'value': ''
+                    }).text('All')));
+                    $.each(dtArr.years, function(key,value) {
+                        $el.append($("<li></li>").addClass('filterAuthor').append($('<a></a>').attr({
+                            'href':'#',
+                            'type': 'year',
+                            'value': value
+                        }).text(value)));
+                    });
+                }else{
+                    var $el = $(".articleFilter .year ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'year',
+                        'value': ''
+                    }).text('All')));
+                }
+
+                /* update position for filter*/
+                if(dtArr.positions.length > 0){
+                    var $el = $(".authorFilter .position ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterAuthor current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'position',
+                        'value': ''
+                    }).text('All')));
+                    $.each(dtArr.positions, function(key,value) {
+                        $el.append($("<li></li>").addClass('filterAuthor').append($('<a></a>').attr({
+                            'href':'#',
+                            'type': 'position',
+                            'value': value
+                        }).text(value)));
+                    });
+                }else{
+                    var $el = $(".articleFilter .position ul");
+                    $el.empty();
+                    $el.append($("<li></li>").addClass('filterArticle current').append($('<a></a>').attr({
+                        'href':'#',
+                        'type': 'position',
+                        'value': ''
+                    }).text('All')));
+                }
+            }
+            chart.hideLoading();
+            chart.redraw();
+        }
+        $('#questions').change(function(event) {
+            qid = $(this).val();
+            current_q = qid;
+            chart.showLoading('Loading Chart Data, please wait.....');
+            $('#filter .filtering .overlay').show();
+            $.ajax({
+                url: "http://emor.zdhdemo.com/updateChartData.php?type="+current_type+"&qid="+qid+"&reloadFilter=1",
+                method: "GET",
+                success: function(data, status, xhr) {
+                    reloadChartData(chart,data);
+                    $('#filter .filtering .overlay').hide();
+                }
+            });
+        });
+        $('#filter .filter').click(function(event) {
+            current_type = $(this).attr('filtertype');
+            chart.showLoading('Loading Chart Data, please wait.....');
+            $('#filter .filtering .overlay').show();
+            $.ajax({
+                url: "http://emor.zdhdemo.com/updateChartData.php?type="+current_type+"&qid="+current_q+"&loc="+current_loc+"&name="+current_name+"&reloadFilter=1",
+                method: "GET",
+                success: function(data, status, xhr) {
+                    reloadChartData(chart,data);
+                    if(current_type=='author'){
+                        $('.authorFilter').show();
+                        $('.articleFilter').hide();
+                    }else{
+                        $('.authorFilter').hide();
+                        $('.articleFilter').show();
+                    }
+                    $('#filter .filtering .overlay').hide();
+                }
+            });
+            return false;
+        });
+        $('#filter .filtering .subject > a').click(function(event) {
+            $(this).next('ul').slideToggle('slow');
+            $(this).parent('li').toggleClass('open');
+            return false;
+        });
+
+        /*Author filtering*/
+        $('body').on('click','#filter .filtering .filterAuthor > a',function(event) {
+            $(this).parents('ul.child').find('li').removeClass('current');
+            $(this).parent().addClass('current');
+            type = $(this).attr('type');
+            value = $(this).attr('value');
+            if(type == 'year') current_year = value;
+            else if(type == 'loc') current_loc = value;
+                else if(type == 'name') current_name = value;
+            reloadLink = "http://emor.zdhdemo.com/updateChartData.php?type="+current_type+"&qid="+current_q;
+            if(current_name!='')
+                reloadLink += "&name="+current_name;
+            if(current_loc!='')
+                reloadLink += "&loc="+current_loc;
+            if(current_year!='')
+                reloadLink += "&year="+current_year;
+
+            chart.showLoading('Loading Chart Data, please wait.....');
+            $('#filter .filtering .overlay').show();
+            $.ajax({
+                url: reloadLink,
+                method: "GET",
+                success: function(data, status, xhr) {
+                    var dtArr = (new Function("return " + data+ ";")());
+                    chart.series[0].setData(dtArr.dataSeries);
+                    chart.xAxis[0].setCategories(dtArr.cats);
+                    if(current_type!='author'){
+                        if(current_type=='text'){
+                            chart.series[0].name = 'Article Text';
+                            chart.legend.allItems[0].update({name:'Article Text'});
+                        }else if(current_type=='video'){
+                            chart.series[0].name = 'Article Video';
+                            chart.legend.allItems[0].update({name:'Article Video'});
+                        }else{
+                            chart.series[0].name = 'Article Audio';
+                            chart.legend.allItems[0].update({name:'Article Audio'});
+                        }
+                    }else{
+                        chart.series[0].name = 'Author';
+                        chart.legend.allItems[0].update({name:'Author'});
+                    }
+                    chart.hideLoading();
+                    chart.redraw();
+                    $('#filter .filtering .overlay').hide();
+                }
+            });
+            return false;
+        });
+        
+        /*Articles Filtering*/
+        $('body').on('click','#filter .filtering .filterArticle > a',function(event) {
+            $(this).parents('ul.child').find('li').removeClass('current');
+            $(this).parent().addClass('current');
+            type = $(this).attr('type');
+            value = $(this).attr('value');
+            if(type == 'year') current_year = value;
+            else if(type == 'loc') current_loc = value;
+            else if(type == 'name') current_name = value;
+            else if(type == 'media_type') current_media_type = value;
+            else if(type == 'author') current_author_name = value;
+            else if(type == 'language') current_language = value;
+            else if(type == 'page_length') current_page_length = value;
+            else if(type == 'isMapping') current_is_mapping = value;
+            reloadLink = "http://emor.zdhdemo.com/updateChartData.php?type="+current_type+"&qid="+current_q;
+            if(current_name!='')
+                reloadLink += "&name="+current_name;
+            if(current_loc!='')
+                reloadLink += "&loc="+current_loc;
+            if(current_year!='')
+                reloadLink += "&year="+current_year;
+            if(current_author_name!='')
+                reloadLink += "&author="+current_author_name;
+            if(current_language!='')
+                reloadLink += "&language="+current_language;
+            if(current_page_length!='')
+                reloadLink += "&page_length="+current_page_length;
+            if(current_is_mapping!='')
+                reloadLink += "&is_mapping="+current_is_mapping;
+
+            chart.showLoading('Loading Chart Data, please wait.....');
+            $('#filter .filtering .overlay').show();
+            $.ajax({
+                url: reloadLink,
+                method: "GET",
+                success: function(data, status, xhr) {
+                    var dtArr = (new Function("return " + data+ ";")());
+                    chart.series[0].setData(dtArr.dataSeries);
+                    chart.xAxis[0].setCategories(dtArr.cats);
+                    if(current_type!='author'){
+                        if(current_type=='text'){
+                            chart.series[0].name = 'Article Text';
+                            chart.legend.allItems[0].update({name:'Article Text'});
+                        }else if(current_type=='video'){
+                            chart.series[0].name = 'Article Video';
+                            chart.legend.allItems[0].update({name:'Article Video'});
+                        }else{
+                            chart.series[0].name = 'Article Audio';
+                            chart.legend.allItems[0].update({name:'Article Audio'});
+                        }
+                    }else{
+                        chart.series[0].name = 'Author';
+                        chart.legend.allItems[0].update({name:'Author'});
+                    }
+                    chart.hideLoading();
+                    chart.redraw();
+                    $('#filter .filtering .overlay').hide();
+                }
+            });
+            return false;
+        });
+        $('.showFilter').click(function(event) {
+            el = $(this).parent().next();
+            el.toggleClass('show');
+            $(this).toggleClass('fa-minus-circle').toggleClass('fa-plus-circle')
+            return false;
+        });
+    });
+</script>
+<a href="#authorPopup" id="showAuthorPopup"></a>
+<a href="#articlePopup" id="showArticlePopup"></a>
+<div id="authorPopup" style="display:none;" class="infos author">
+    <h2><label>Result Details</label> </h2>
+    <label>Avatar</label>
+    <img class="authorAvatar" src="" alt="" style="max-width:100px;">
+    <div>
+        <p class="name"><label>Author Name:</label> <span>Author</span></p>
+        <p class="position"><label>Position held:</label> <span>Position</span></p>
+        <p class="dob"><label>Time Period:</label> <span>dob</span></p>
+        <p class="location"><label>Geographic Location:</label> <span>City - Country</span></p>
+        <p class="language"><label>Language:</label> <span>English/ עברית</span></p>
+        <div class="works">
+            <label>Links</label>
+            <ul class="listWorks"></ul>
+        </div>
+    </div>
+</div>
+<div id="articlePopup" style="display:none;" class="infos article">
+    <h2><label>Result Details</label></h2>
+    <p class="author"><label>Author's Name:</label> <span>Author</span></p>
+    <p class="position"><label>Position Held:</label> <span>Position Held</span></p>
+    <p class="title"><label>Article title:</label> <span>Article title</span></p>
+    <p class="publish"><label>Year of Publication:</label> <span>Year publication</span></p>
+    <p class="location"><label>Geographic Location:</label> <span>City - Country</span></p>
+    <div class="works">
+        <label>Links</label>
+        <ul class="listWorks"></ul>
+    </div>
+    <p class="totalPage"><label>Length:</label> <span>100</span></p>
+    <p class="inMapping"><label>Available in Mapping Format:</label> <span>Yes/No</span></p>
+    <p class="language"><label>Language:</label> <span>English/ עברית</span></p>
+</div>
 <div{{ attributes.addClass('col-lg-8 bubble-chart mapping-home-item') }}>
   {{ title_prefix }}
   {% if label %}
@@ -35,23 +677,163 @@
   {{ title_suffix }}
   {% block content %}
     <h2 class="text-center">Bubble Chart<i class="fa fa-info info-tooltip"></i></h2>
-    <div id="bubbleChartContainer" style="min-width: 310px; max-width: 600px; height: 400px; margin: 0 auto; display:none;"></div>
-    {#
-    <ul>
-      {% for author in authors %}
-          <li>{{ author.title.value|e }}</li>
-          <li>{{ author.created.value|date("d/m/Y") }}</li>
-          <li>{{ author.field_email.value|e }}</li>
-      {% endfor %}
-    </ul>
-    <ul>
-      {% for article in articles %}
-          <li>{{ article.title.value|e }}</li>
-          <li>{{ article.created.value|date("d/m/Y") }}</li>
-          <li>{{ article.field_author.value|e }}</li>
-      {% endfor %}
-    </ul>
-    #}
-	{{ content }}
+    <div id="bubbleChartContainer" style="min-width: 310px; max-width: 600px; height: 400px; margin: 0 auto;"></div>
+    <div id="filter">
+        <h2>Click to Interact</h2>
+        <a href="#" class="filter" filtertype="author">Show All Authors  <br> <span>הראה את כל המחברים</span></a>
+        <a href="#" class="filter" filtertype="text">Show All Texts  <br><span>הראה את כל הטקסטים</span> </a>
+        <a href="#" class="filter" filtertype="video">Show All Videos  <br><span>הראה את כל הסרטונים</span></a>
+        <a href="#" class="filter" filtertype="audio">Show All Audio  <br><span>הראה את כל קטעי השמע</span> </a>
+        <div class="filtering">
+            <div class="overlay"></div>
+            <h3 class="filterTitle">Filters | <span>סננים</span> </h3>
+            <div class="authorFilter">
+                <h4 class="filterTitle">Display by Author  <br><span>לתצוגה לפי מחברים</span> <i class="fa fa-plus-circle showFilter"></i></h4>
+                <ul>
+                    <li class="subject authorName">
+                        <a href="#">Author's Name  <br><span>הראה את כל המחברים</span> </a>
+                        <ul class="child">
+                            <li class="filterAuthor current"><a href="#" type="name" value="">All</a></li>
+                            {% for name in names %}
+                                <li class="filterAuthor"><a href="#" type="name" value="{{ name|e }}">{{ name|e }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li class="subject position">
+                        <a href="#">Position Held  <br><span>הראה את כל הטקסטים</span> </a>
+                        <ul class="child">
+                                <li class="filterAuthor current"><a href="#" type="position" value="">All</a></li>
+                            {% for position in positions %}
+                                <li class="filterAuthor"><a href="#" type="position" value="{{ position|e }}">{{ position|e }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li class="subject year">
+                        <a href="#">Time Period  <br><span>הראה את כל קטעי השמע</span> </a>
+                        <ul class="child">
+                                <li class="filterAuthor current"><a href="#" type="year" value="">All</a></li>
+                            {% for year in years %}
+                                <li class="filterAuthor"><a href="#" type="year" value="{{ year|e }}">{{ year|e }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li class="subject location">
+                        <a href="#">Geographic Location  <br><span>הראה את כל הטקסטים</span></a>
+                        <ul class="child">
+                                <li class="filterAuthor current"><a href="#" type="loc" value="">All</a></li>
+                            {% for city in cities %}
+                                <li class="filterAuthor"><a href="#" type="loc" value="{{ city|e }}">{{ city|e }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div class="articleFilter" style="display:none;">
+                <h4 class="filterTitle">Display by Media Type <br><span>לתצוגה לפי סוג מדיה</span><i class="fa fa-plus-circle showFilter"></i></h4>
+                <ul>
+                    <li class="subject language">
+                        <a href="#">English / <span>עברית</span></a>
+                        <ul class="child">
+                            <li class="filterArticle current"><a href="#" type="language" value="">All</a></li>
+                            <li class="filterArticle"><a href="#" type="language" value="English">English</a></li>
+                            <li class="filterArticle"><a href="#" type="language" value="Hebrew">Hebrew</a></li>
+                        </ul>
+                    </li>
+                    <li class="subject mediaType">
+                        <a href="#">Media type  <br><span>סוג מדיה</span></a>
+                        <ul class="child">
+                        </ul>
+                    </li>
+                    <li class="subject authorName">
+                        <a href="#">Author's Name  <br><span>שם המחברים</span></a>
+                        <ul class="child">
+                        </ul>
+                    </li>
+                    <li class="subject position">
+                        <a href="#">Position Held  <br><span>עמדה</span></a>
+                        <ul class="child">
+                        </ul>
+                    </li>
+                    <li class="subject articleName">
+                        <a href="#">Title  <br><span>כותרת</span></a>
+                        <ul class="child">
+                        </ul>
+                    </li>
+                    <li class="subject publicYear">
+                        <a href="#">Year of Publication  <br><span>שנת פרסום</span></a>
+                        <ul class="child">
+                        </ul>
+                    </li>
+                    <li class="subject location">
+                        <a href="#">Geographic Location  <br><span>מיקום גאוגרפי</span></a>
+                        <ul class="child">
+                        </ul>
+                    </li>
+                    <li class="subject pagelengths">
+                        <a href="#">Length  <br><span>אורך</span></a>
+                        <ul class="child">
+                        </ul>
+                    </li>
+                    <li class="subject isMapping">
+                        <a href="#">Available in Mapping Format  <br><span>זמין בפורמט המיפוי</span></a>
+                        <ul class="child">
+                            <li class="filterArticle current"><a href="#" type="isMapping" value="">All</a></li>
+                            <li class="filterArticle"><a href="#" type="isMapping" value="0">No</a></li>
+                            <li class="filterArticle"><a href="#" type="isMapping" value="1">Yes</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div id="listQuestions">
+        <label for="questions">Select a topic: </label>
+        <select name="questions" id="questions">
+            {% for question in questions %}
+                {% if question.nid.value == curr_ques_id %}
+                    <option value="{{ question.nid.value|e }}" selected="selected">{{ question.title.value|e }}</option>
+                {% else %}
+                    <option value="{{ question.nid.value|e }}">{{ question.title.value|e }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+    <div id="bubbleDetail">
+        <div style="display:none;" class="infos author">
+            <h2><label>Result details</label></h2>
+            <div>
+                <p>
+                    <label>Avatar</label>
+                    <img class="authorAvatar" src="" alt="" style="max-width:100px;">
+                </p>
+                <p class="name"><label>Author Name:</label> <span>Author</span></p>
+                <p class="position"><label>Position held:</label> <span>Position</span></p>
+                <p class="dob"><label>Time Period:</label> <span>dob</span></p>
+                <p class="location"><label>Geographic Location:</label> <span>City - Country</span></p>
+                <p class="language"><label>Language:</label> <span>English/ עברית</span></p>
+                <div class="works">
+                    <label>List of works</label>
+                    <ul class="listWorks"></ul>
+                </div>
+            </div>
+        </div>
+        <div style="display:none;" class="infos article">
+            <h2><label>Result details</label></h2>
+            <div>
+                <p class="author"><label>Author's Name:</label> <span>Author</span></p>
+                <p class="position"><label>Position Held:</label> <span>Position Held</span></p>
+                <p class="title"><label>Article title:</label> <span>Article title</span></p>
+                <p class="publish"><label>Year of Publication:</label> <span>Year publication</span></p>
+                <p class="location"><label>Geographic Location:</label> <span>City - Country</span></p>
+                <div class="works">
+                    <label>List of works</label>
+                    <ul class="listWorks"></ul>
+                </div>
+                <p class="totalPage"><label>Length:</label> <span>100</span></p>
+                <p class="inMapping"><label>Available in Mapping Format:</label> <span>Yes/No</span></p>
+                <p class="language"><label>Language:</label> <span>English/ עברית</span></p>
+            </div>
+        </div>
+    </div>
   {% endblock %}
 </div>

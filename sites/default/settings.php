@@ -713,36 +713,20 @@ if (file_exists(__DIR__ . '/settings.local.php')) {
   include __DIR__ . '/settings.local.php';
 }
 $databases['default']['default'] = array (
-  'database' => 'emormapping',
-  'username' => 'andeptrai',
-  'password' => 'abc123',
+  // 'database' => 'bsscocom_emor',
+  // 'username' => 'bsscocom_emor',
+  // 'password' => 'bdUOZfKtesQf',
+  'database' => 'zdhdemoc_emor',
+  'username' => 'zdhdemoc_emor',
+  'password' => 'm;{21aimhvuJ',
+
   'prefix' => '',
-  'host' => '192.168.1.222',
+  'host' => 'localhost',
   'port' => '3306',
   'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
   'driver' => 'mysql',
 );
 $settings['install_profile'] = 'standard';
 $config_directories['sync'] = 'sites/default/files/config_hcYmO-1oNHKD8LZnA6C5WfWWB9mGtTtrFNq4dxLdBSkOyS2JdDZe8fZMVlKTkfBIUc79qxYz8g/sync';
-
-//FOR DEVELOP ONLY - PLEASE EDIT CONFIG BEFORE LIVE
-$exIP = file_get_contents('http://ip.pavietnam.vn/');
-$whitelist = array(
-	'116.98.110.213',
-	'117.3.47.161',
-	'116.98.110.240',
-	'14.167.12.203',
-	);
-if ( !in_array($exIP, $whitelist) ){
-	$databases['default']['default'] = array (
-	  'database' => 'emormapping',
-	  'username' => 'andeptrai',
-	  'password' => 'abc123',
-	  'prefix' => '',
-	  'host' => 'sql.andeptrai.xyz',
-	  'port' => '223',
-	  'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
-	  'driver' => 'mysql',
-	);
-}
-//END DEVELOP CONFIG
+$config['system.logging']['error_level'] = 'verbose';
+// $settings['twig_debug'] = TRUE;

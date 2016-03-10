@@ -4,10 +4,12 @@ global-styling:
     base:
       css/bootstrap.min.css: {}
       css/font-awesome.min.css: {}
+      css/jquery.fancybox.css : {}
+      css/jquery.fs.selecter.min.css : {}
       css/base/elements.css: {}
       css/base/custom.css: {}
     component:
-      css/components/block.css: {}
+      #css/components/block.css: {}
       css/components/book.css: {}
       css/components/breadcrumb.css: {}
       css/components/captions.css: {}
@@ -32,7 +34,7 @@ global-styling:
       css/components/node-preview.css: {}
       css/components/page-title.css: {}
       css/components/pager.css: {}
-      css/components/panel.css: {}
+      #css/components/panel.css: {}
       css/components/primary-menu.css: {}
       css/components/search-form.css: {}
       css/components/search-results.css: {}
@@ -67,6 +69,8 @@ global-styling:
     js/highcharts.js: {}
     js/highcharts-more.js: {}
     #js/jquery-ui.min.js: {}
+    js/jquery.fancybox.min.js: {}
+    js/jquery.fs.selecter.min.js: {}
     js/functions.js: {}
   dependencies:
     - core/jquery

@@ -13,15 +13,120 @@
 <form{{ attributes }}>
   	<h2>Sort By</h2>
 		<ul>
-		    {% for key, value in sort_by %}
-		        <li><a href="?sort_by={{ key }}&sort_order=ASC">{{ value }}</a></li>
+		    {% for key, value in sort_by if value %}
+		        {% if key == 'Media type' %}
+		        <li class="{{ ( queryArr.sort_by in attribute(sort_by, key)|keys )  ? 'active' : '' }}">
+		        	<a class="sort-by-media" data-value="{{key}}" href="javascript:void(0)" data-toggle="collapse" data-target="#sort-by-media">{{ key }}</a>
+		        	<ul id="sort-by-media" class="collapse {{ ( queryArr.sort_by in attribute(sort_by, key)|keys )  ? 'in' : '' }}">
+			        	{% for mediaKey, mediaValue in attribute(sort_by, key) if value %}
+					        <li class="sort-by-media-sub {{ ( queryArr.sort_by  == mediaKey)  ? 'active' : '' }}">
+					        	<a class="sort-by-link" data-value="{{mediaKey}}" href="javascript:void(0)">{{ mediaValue }}</a>
+					        </li>		        		
+					    {% endfor %}
+		        	</ul>
+		        </li>
+		        {% else %}
+		        <li class="{{ ( queryArr.sort_by  == key)  ? 'active' : '' }}">
+		        	<a class="sort-by-link" data-value="{{key}}" href="javascript:void(0)">{{ value }}</a>
+		        </li>		        
+		        {% endif %}
 		    {% endfor %}
+	    	<input type="hidden" id="sort_by" name="sort_by" value="{{ (attribute(customSortBy, attribute(element.sort_by, '#value'))) ? attribute(customSortBy, attribute(element.sort_by, '#value')) : attribute(element.sort_by, '#value') }}">
 		</ul>  	
     <h2>Filter By</h2> 
-		<ul>
-		    {% for key, value in filter_by %}
-		        <li>{{ value.label }}</li>
+		<ul class="filter">
+		    {% for key, value in filter_by if value.value in customFilter|keys %}
+		    <li class="{{key}} {{ ( attribute(queryArr, value.value) )  ? 'active' : '' }} "><a data-toggle="collapse" data-target="#collapse-{{value.value}}">{{ value.label }}</a>
+		    	<div class="explore-filter-select collapse {{ ( attribute(queryArr, value.value) )  ? 'in' : '' }}" id="collapse-{{value.value}}">
+				{% if value.value == 'type' %}
+					
+					    
+					        <select multiple id="edit-type" class="custom-filter-type" name="type">
+						        {% for customFilterkey, item in attribute(customFilter.type, '#options') %}
+						            {% if loop.index == 1 %}
+						            	<option value="{{customFilterkey}}" {{ ( attribute(element.type, '#value') == customFilterkey) ? 'selected' : '' }}>{{ customFilterkey }}</option>
+						            {% else %}
+						            	<option value="{{customFilterkey}}" {{ ( attribute(element.type, '#value') == customFilterkey) ? 'selected' : '' }}>{{ item }}</option>
+									{% endif %}	
+						        {% endfor %}
+					        </select>
+					    
+				    
+			 	{% elseif (value.value == 'author') %}
+					
+					   
+					        <select multiple id="edit-author" class="custom-filter-author" name="author">
+						        <option value="" {{ ( queryArr.author == author ) ? 'selected' : '' }}>All</option>
+						        {% for authorKey, author in customFilter.author %}
+					            	<option value="{{author}}" {{ ( queryArr.author == author ) ? 'selected' : '' }}>{{ author }}</option>
+						        {% endfor %}
+					        </select>
+					   
+					
+				{% elseif (value.value == 'year') %}
+					    
+					        <select multiple id="edit-year" class="custom-filter-year" name="year">
+					        	<option value="" {{ ( queryArr.year == year ) ? 'selected' : '' }}>All</option>
+						        {% for yearKey, year in customFilter.year %}
+					            	<option value="{{year}}" {{ ( queryArr.year == year ) ? 'selected' : '' }}>{{ year }}</option>
+						        {% endfor %}
+					        </select>
+					   
+				{% elseif (value.value == 'keywords') %}
+					    
+					        <select multiple id="edit-keywords" class="custom-filter-keywords" name="keywords">
+						        {% for customFilterkey, item in attribute(customFilter.keywords, '#options') %}
+						            {% if loop.index == 1 %}
+						            	<option value="{{customFilterkey}}" {{ ( attribute(element.keywords, '#value') == customFilterkey) ? 'selected' : '' }}>{{ customFilterkey }}</option>
+						            {% else %}
+						            	<option value="{{customFilterkey}}" {{ ( attribute(element.keywords, '#value') == customFilterkey) ? 'selected' : '' }}>{{ item }}</option>
+									{% endif %}	
+						        {% endfor %}
+					        </select>
+					    				    
+				{% elseif (value.value == 'length_val') %}
+					  
+					        <select multiple id="edit-length_val" class="custom-filter-length_val" name="length">
+								<option value="All" {{ (queryArr.length == 'All') ? 'selected' : '' }}>All</option>
+								<option value="1" {{ (queryArr.length == '1') ? 'selected' : '' }} >1-3 pages</option>
+								<option value="2" {{ (queryArr.length == '2') ? 'selected' : '' }} >4-6 pages</option>
+								<option value="3" {{ (queryArr.length == '3') ? 'selected' : '' }}>more than 7 pages</option>
+					        </select>
+					   				    			 	
+			 	{% else %}
+			 		<!-- <li class="{{ key }}"><a>{{ value.label }}</a></li> -->
+				{% endif %}
+				</div>
+			</li>
 		    {% endfor %}
-		</ul>       
-  	{{ children }}
+		</ul>
+		<input type="hidden" id="edit-search" name="search" value="{{attribute(element.search, '#value')}}">
+		<input type="hidden" id="edit-search" name="category" value="{{attribute(element.category, '#value')}}">
+	<div class="hiddens">
+  	{#{dump(queryArr)}#}
+  	{#{ children }#}
+  	</div>
 </form>
+<script>
+	jQuery(document).ready(function(){
+		function submitExploreForm(){
+			jQuery('#views-exposed-form-emor-mapping-explore-page').find('[name]').each(function(){
+				(jQuery(this).val() == '') && jQuery(this).remove();	
+			});
+			// (jQuery('#edit-search').val() == '') && jQuery('#edit-search').remove();
+			queryString = jQuery('#views-exposed-form-emor-mapping-explore-page').serialize();
+			ajaxRequest(queryString, '/emor-mapping-explore');				
+		}		
+		jQuery('.sort-by-link').on('click',function(){
+			jQuery('#sort_by').val(jQuery(this).data('value'));
+			submitExploreForm();
+		});
+		jQuery('.explore-filter-select select').on('change',function(){
+			submitExploreForm();
+		});
+		jQuery('.custom-filter-author').on('change',function(){
+			// jQuery('#edit-search').val()
+			// console.log(jQuery(this).val());
+		});		
+	});
+</script>

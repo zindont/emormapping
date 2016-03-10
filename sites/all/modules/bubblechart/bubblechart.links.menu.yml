@@ -1,0 +1,5 @@
+bubblechart.admin:
+  title: 'Bubble chart settings'
+  description: 'All setting for bubble chart'
+  parent: system.admin_config_development
+  weight: 100

@@ -91,7 +91,7 @@ class ColorFieldWidgetDefault extends WidgetBase {
       '#type' => 'textfield',
       '#maxlength' => 7,
       '#size' => 7,
-      '#required' => $element['#required'],
+      '#required' => '',//$element['#required'],
       '#placeholder' => $this->getSetting('placeholder_color'),
       '#default_value' => isset($items[$delta]->color) ? $items[$delta]->color : NULL,
     );
@@ -104,7 +104,7 @@ class ColorFieldWidgetDefault extends WidgetBase {
         '#type' => 'textfield',
         '#maxlength' => 4,
         '#size' => 4,
-        '#required' => $element['#required'],
+        '#required' => '',//$element['#required'],
         '#placeholder' => $this->getSetting('placeholder_opacity'),
         '#default_value' => isset($items[$delta]->opacity) ? $items[$delta]->opacity : NULL,
         '#suffix' => '</div>',

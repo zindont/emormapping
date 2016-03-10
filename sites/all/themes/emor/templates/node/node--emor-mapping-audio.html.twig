@@ -82,7 +82,11 @@
       <p class="author-name"><i>by {{author_name}}</i></p>
     </div>
     <div class="col-lg-5 img-box">
-      <img src="{{theme_path}}/images/article-placeholder.jpg" alt="">
+      {% if content.thumbnail == '' %}
+        <img src="{{theme_path}}/images/imgpsh_fullsize.jpg" alt="">
+      {% else %}
+        <img src="{{ content.thumbnail }}" alt="">
+      {% endif %}
     </div>
     <div class="col-xs-12">
       <div class="abstract">
@@ -126,7 +130,11 @@
         </div>
       </div>
       <div class="content audio">
-        {{content}}
+        {#{content}#}
+         <audio controls>
+            <source src="{{ node.field_audio.uri|e }}" type="audio/mpeg">
+            Your browser does not support the audio element.
+          </audio> 
       </div>
     </div>
     <div class="col-lg-4 content-tabs">
@@ -170,9 +178,10 @@
           <h2 class="text-uppercase"><strong>Mapped In</strong></h2>
           <div class="breadcrumb">
 
-              <span>Halacha &amp; Leadership</span><i class="fa fa-angle-double-right"></i>
+              {# <span>Halacha &amp; Leadership</span><i class="fa fa-angle-double-right"></i>
               <span>Halacha</span><i class="fa fa-angle-double-right"></i>
-              <span>Autonomy</span>
+              <span>Autonomy</span> #}
+              <span>{{ content.index_categories_name }}</span>
 
           </div> 
 
@@ -207,8 +216,7 @@
   <div class="container">
     <h2 class="text-uppercase"><strong>Author’s FOOTNOTES</strong></h2>
     <p>
-      1Lorem Ipsum is simply dummy text of the printing and typesetting industry.<br>
-      2Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. 
+      {{ content.field_author_footnote }}
     </p>
   </div>
 </div>

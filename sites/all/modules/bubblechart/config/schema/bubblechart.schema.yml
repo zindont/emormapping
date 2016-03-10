@@ -1,0 +1,7 @@
+bubblechart.config:
+  type: config_object
+  label: 'Bubble chart config'
+  mapping:
+    message:
+      type: text
+      label: 'Message'

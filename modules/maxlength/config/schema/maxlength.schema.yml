@@ -1,0 +1,10 @@
+node.type.*.third_party.maxlength:
+  type: mapping
+  label: 'Per-content type maxlength settings'
+  mapping:
+    maxlength_js:
+      type: integer
+      label: 'Maxlength JS'
+    maxlength_js_label:
+      type: string
+      label: 'Count down message'

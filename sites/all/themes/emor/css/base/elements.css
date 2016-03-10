@@ -12,7 +12,7 @@ body {
   line-height: 1.5;
   word-wrap: break-word;
   font-family: "Aileron", Times, serif;
-  font-size: 14px;
+  font-size: 13px;
   color: #1b5292;
   background-color: #e7ebee;
 }
@@ -144,7 +144,7 @@ blockquote > p:first-child {
 }
 
 .dropdown-submenu:hover>.dropdown-menu {
-    display: block;
+    /*display: block;*/
 }
 
 .dropdown-submenu>a:after {

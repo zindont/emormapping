@@ -78,15 +78,19 @@
     <div class="col-lg-7 title-box">
       <h2 class="index-title">{{ content.index_categories_name }}</h2>
       <h1 class="node-title">{{ label }}</h1>
-      <p class="author-name"><i>by {{author_name}}</i></p>
+      <p class="author-name"><i>by {{author.name}}</i></p>
     </div>
     <div class="col-lg-5 img-box">
-      <img src="{{theme_path}}/images/article-placeholder.jpg" alt="">
+      {% if content.thumbnail == '' %}
+        <img src="{{theme_path}}/images/imgpsh_fullsize.jpg" alt="">
+      {% else %}
+        <img src="{{ content.thumbnail }}" alt="">
+      {% endif %}
     </div>
     <div class="col-xs-12">
       <div class="abstract">
         <h2 class="text-uppercase"><strong>Abstract</strong></h2>
-        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic.</p>
+        <p>{{ content.field_short_description }}</p>
       </div>
     </div>
   </div>
@@ -125,7 +129,7 @@
         </div>
       </div>
       <div class="content">
-        {{content}}
+        {{ newContent.body | raw }}
       </div>
     </div>
     <div class="col-lg-4 content-tabs">
@@ -137,12 +141,16 @@
 
         <div class="tab-content">
           <div id="table-of-content" class="tab-pane fade">
-            <h3>HOME</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            {#{ node.field_table_of_content.value|raw }#}
+            {% for item in newContent.dataTableOfContent %}
+                <p><strong><a href="#{{ item.id }}">{{ item.head_content }}</a></strong></p>
+            {% endfor %}            
           </div>
           <div id="emor-notes" class="tab-pane fade in active">
-            <h3>Menu 1</h3>
-            <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            {#{ node.field_emor_notes.value | raw }#}
+            {% for key,item in newContent.dataEmorNotes %}
+                <p id="emor-notes-{{item.id}}"><sup><b>{{key + 1}}</b></sup><b>{{ (item.note_label) ? item.note_label ~ ' - '}}</b>{{ item.note_content | raw}}</p>
+            {% endfor %}               
           </div>
         </div>
       </div>
@@ -151,17 +159,10 @@
         <div class="panel-group">
           <div class="panel panel-default">
             <div class="panel-heading">
-                <a class="panel-title" data-toggle="collapse" href="#collapse1">TAGS</a>
+                <a class="panel-title" data-toggle="collapse" aria-expanded="false" href="#collapse1">TAGS</a>
             </div>
             <div id="collapse1" class="panel-collapse collapse">
-              <div class="panel-body">Tags, Tags, Tags, Tags, Tags, Tags, Tags, Tags,</div>
-              <div class="panel-footer">
-                Article name by author<br>
-                Article name by author<br>
-                Article name by author<br>
-                Article name by author<br>
-                Article name by author<br>                                                            
-              </div>
+              <div class="panel-body">{{ content.field_tags }}</div>
             </div>
           </div>
         </div>      
@@ -177,16 +178,16 @@
           <h2 class="text-uppercase"><strong>Mapped In</strong></h2>
           <div class="breadcrumb">
 
-              <span>Halacha &amp; Leadership</span><i class="fa fa-angle-double-right"></i>
-              <span>Halacha</span><i class="fa fa-angle-double-right"></i>
-              <span>Autonomy</span>
-
+            {% for value in content.mapped_in|reverse %}
+              <span>{{ value|capitalize }}</span><i class="fa fa-angle-double-right"></i>
+            {% endfor %}
+              <span>{{ content.index_categories_name|capitalize }}</span>
           </div> 
 
         </div>
         <div class="col-lg-4 info text-right">
           <h2 class="text-uppercase"><strong>Published</strong></h2>
-          {% trans %} <i class="fa fa-calendar"></i> {{ date }} {% endtrans %}
+          <i class="fa fa-calendar"></i> {{node.field_published_date.value|date('D, m/d/Y') }}
         </div>
         
       </div>
@@ -200,11 +201,11 @@
   <div class="container">
     <div class="row">
       <div class="col-lg-1 author-img">
-        <img src="{{theme_path}}/images/author.jpg" alt="">
+        <img src="{{author.profile_photo}}" alt="">
       </div>
       <div class="col-lg-10 author-quote">
-        <strong>Rav Jeffery Woolf</strong>
-        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has sur ...<strong>Readmore</strong></p>
+        <strong>{{ author.name }}</strong>
+        <p>{{author.summary|raw}} ... <strong><a href="{{ path('entity.node.canonical', {'node': author.id}) }}">Readmore</a></strong></p>
       </div>      
     </div>
   </div>
@@ -214,8 +215,7 @@
   <div class="container">
     <h2 class="text-uppercase"><strong>Author’s FOOTNOTES</strong></h2>
     <p>
-      1Lorem Ipsum is simply dummy text of the printing and typesetting industry.<br>
-      2Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. 
+      {{ content.field_author_footnote }}
     </p>
   </div>
 </div>

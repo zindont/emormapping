@@ -1,0 +1,197 @@
+<?php
+
+	/**
+	 * @file
+	 * The PHP page that serves all page requests on a Drupal installation.
+	 *
+	 * All Drupal code is released under the GNU General Public License.
+	 * See COPYRIGHT.txt and LICENSE.txt files in the "core" directory.
+	 */
+	use Drupal\Core\DrupalKernel;
+	use Symfony\Component\HttpFoundation\Request;
+
+	$autoloader = require_once 'autoload.php';
+
+	$kernel = new DrupalKernel('prod', $autoloader);
+
+	$request = Request::createFromGlobals();
+	$response = $kernel->handle($request);
+	// $response->send();
+
+	// $kernel->terminate($request, $response);
+
+	use Drupal\Core\Template\Attribute;
+	use Drupal\views\Views;
+	use Drupal\node\Entity\Node;
+	use Drupal\taxonomy\TermStorage;
+
+ 	//Prepare for Bubble chart
+	$storage = \Drupal::entityManager()->getStorage('node');
+
+	$qIds = $storage->getQuery()
+	->condition('type', 'question')
+	->condition('status', 1)
+	->execute();
+
+	// $variables['questions'] = $storage->loadMultiple($qIds);
+	 $questions = $storage->loadMultiple($qIds);
+
+	$questionId = $_GET['qid'];
+
+	//get all answers depend on question
+	$asIds = $storage->getQuery()
+	  ->condition('type', 'answer')
+	  ->condition('status', 1)
+	  ->condition('field_question', $questionId)
+	  ->execute();
+	$answers = $storage->loadMultiple($asIds);
+
+	// get all authors depend on answers
+	$auIds = array();
+	foreach ($answers as $answer) {
+		$tmp = $answer->get('field_author_bubble');
+		foreach ($tmp as $item) {
+		  $auIds[] = (int)$item->target_id;
+		}
+	}
+	$authors = $storage->loadMultiple($auIds);
+
+?>
+
+<script src="http://emor.zdhdemo.com/core/assets/vendor/jquery/jquery.min.js?v=2.1.4"></script>
+<script src="http://emor.zdhdemo.com/sites/all/themes/emor/js/highcharts.js?v=8.0.1"></script>
+<script src="http://emor.zdhdemo.com/sites/all/themes/emor/js/highcharts-more.js?v=8.0.1"></script>
+<script src="http://emor.zdhdemo.com/sites/all/themes/emor/js/jquery.fancybox.min.js?v=8.0.1"></script>
+<script type="text/javascript">
+    jQuery(document).ready(function($) {
+        $('#bubbleChartContainer').highcharts({
+
+            chart: {
+                type: 'bubble',
+                plotBorderWidth: 1,
+                zoomType: 'xy'
+            },
+
+            title: {
+                text: ''
+            },
+
+            xAxis: {
+                title: {
+                  text: "Articles"
+                },
+                categories: [
+                    '',
+                    <?php foreach ($answers as $answer):?>
+                    	<?php echo '"'.$answer->title->value.'"';?>,
+                    <?php endforeach;?>
+                ],
+            },
+
+            yAxis: {
+                startOnTick: false,
+                endOnTick: false,
+                title: {
+                  text: "Years"
+                },
+                tickInterval:1
+            },
+            legend: {
+                enable: false
+            },
+
+            series: [{
+                name: 'Author',
+                data: [
+                
+                    <?php $i=0; foreach ($authors as $author):?>
+					    <?php $tmp = $i;?>
+					    <?php $j=0; foreach ($answers as $answer):?>
+					        <?php $tmp1 = $j; ?>
+					        <?php foreach ($answer->field_author_bubble as $au):
+					        var_dump($au);exit();?>
+					            <?php if ($author->nid->value == $au->target_id): ?>
+					                <?php $tmp = $tmp1 ?>
+					            <?php endif; ?>
+					        <?php endforeach; ?>
+					    <?php $j++; endforeach; ?>
+					    {
+					        x: <?php echo $tmp ;?>,
+					        y: <?php echo date('Y',$author->field_dob->value) ;?>,
+					        z: <?php if (empty($author->field_size_bubble)):?> 63 <?php else: ?> <?php echo $author->field_size_bubble->value;?> <?php endif; ?>,
+					        name: "<?php echo $author->title->value ;?>",
+					        color: "<?php if(empty($author->field_color_bubble)):?> #FFFFFF <?php else: ?> <?php echo $author->color_bubble->value ;?> <?php endif; ?>",
+					        events: {
+					            click: function (event) {
+					                $.ajax({
+					                    url: "http://emor.zdhdemo.com/node/<?php echo $author->nid->value;?>?_format=json",
+					                    method: "GET",
+					                    headers: {
+					                        "Content-Type": "application/json"
+					                    },
+					                    success: function(data, status, xhr) {
+					                        //alert(data.title[0].value);
+					                        $('#authorPopup .name span').text(data.title[0].value);
+					                        $('#authorPopup .location span').text(data.field_city[0].value + ' ' + data.field_country[0].value);
+					                        $('#authorPopup .dob span').text(data.field_dob[0].value);
+					                        if(data.field_dod!='')
+					                            $('#authorPopup .dod span').text(data.field_dod[0].value);
+					                        else
+					                            $('#authorPopup .dod span').text('');
+					                        if(data.field_phone!='')
+					                            $('#authorPopup .phone span').text(data.field_phone[0].value);
+					                        else
+					                            $('#authorPopup .phone span').text('');
+					                        $('#authorPopup .email span').text(data.field_email[0].value);
+					                        $('#showAuthorPopup').click();
+					                    }
+					                })
+					                //alert(this.name + ' clicked');
+					            }
+					        }
+					    },
+					<?php $i++;endforeach ?>
+                ],
+                marker: {
+                    fillColor: {
+                        radialGradient: { cx: 0.4, cy: 0.3, r: 0.7 },
+                        stops: [
+                            [0, 'rgba(255,255,255,0.5)'],
+                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0.5).get('rgba')]
+                        ]
+                    }
+                },
+                cursor: 'pointer',
+            }]
+
+        });
+    });
+</script>
+<a href="#authorPopup" id="showAuthorPopup"></a>
+<div id="authorPopup" style="display:none;">
+    <img class="authorAvatar" src="" alt="">
+    <div class="infos">
+        <p class="name">Name: <span>Author</span></p>
+        <p class="location">Location: <span>City - Country</span></p>
+        <p class="dob">D.O.B: <span>dob</span></p>
+        <p class="dod">D.O.D: <span>dod</span></p>
+        <p class="phone">Phone: <span>Phone</span></p>
+        <p class="email">Email: <span>Email</span></p>
+    </div>
+</div>
+<div>
+    <h2 class="text-center">Bubble Chart<i class="fa fa-info info-tooltip"></i></h2>
+    <div id="bubbleChartContainer" style="min-width: 310px; max-width: 600px; height: 400px; margin: 0 auto;"></div>
+    <div id="listQuestions">
+        <label for="questions">Select a topic: </label>
+        <select name="questions" id="questions">
+            <?php foreach ($questions as $question):?>
+                <?php if($question->nid->value == $questionId):?>
+                    <option value="<?php echo $question->nid->value;?>" selected="selected"><?php echo $question->title->value;?></option>
+                <?php else: ?>
+                    <option value="<?php echo $question->nid->value;?>"><?php echo $question->title->value;?></option>
+                <?php endif;?>
+            <?php endforeach;?>
+        </select>
+    </div>
+</div>
